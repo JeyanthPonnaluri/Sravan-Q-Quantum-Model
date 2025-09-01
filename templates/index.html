@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+
+{% block title %}Quantum Fraud Detection - Analyze Transaction{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-5">
+            <h1 class="display-4 text-primary">
+                <i class="fas fa-shield-alt me-3"></i>
+                Quantum Fraud Detection
+            </h1>
+            <p class="lead text-muted">
+                Advanced fraud detection using Quantum Computing + AI fusion technology
+            </p>
+            <div class="row text-center mt-4">
+                <div class="col-md-3">
+                    <div class="feature-box">
+                        <i class="fas fa-atom text-primary fa-2x mb-2"></i>
+                        <h6>Quantum Computing</h6>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="feature-box">
+                        <i class="fas fa-brain text-success fa-2x mb-2"></i>
+                        <h6>AI Analysis</h6>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="feature-box">
+                        <i class="fas fa-bolt text-warning fa-2x mb-2"></i>
+                        <h6>Real-time</h6>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="feature-box">
+                        <i class="fas fa-chart-line text-info fa-2x mb-2"></i>
+                        <h6>High Accuracy</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction Form -->
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-credit-card me-2"></i>
+                    Transaction Analysis
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post" action="/analyze" id="transactionForm">
+                    <!-- Basic Transaction Info -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-primary border-bottom pb-2">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Basic Information
+                            </h5>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="amount" class="form-label">
+                                <i class="fas fa-rupee-sign me-1"></i>
+                                Transaction Amount *
+                            </label>
+                            <input type="number" class="form-control" id="amount" name="amount" 
+                                   min="0" step="0.01" required placeholder="Enter amount in ₹">
+                            <div class="form-text">Enter the transaction amount in Indian Rupees</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="hour_of_day" class="form-label">
+                                <i class="fas fa-clock me-1"></i>
+                                Hour of Day *
+                            </label>
+                            <select class="form-select" id="hour_of_day" name="hour_of_day" required>
+                                <option value="">Select hour</option>
+                                {% for hour in range(24) %}
+                                <option value="{{ hour }}">{{ "%02d"|format(hour) }}:00 ({{ "AM" if hour < 12 else "PM" }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Date & Time Info -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-primary border-bottom pb-2">
+                                <i class="fas fa-calendar me-2"></i>
+                                Date & Time Details
+                            </h5>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="day_of_week" class="form-label">
+                                <i class="fas fa-calendar-day me-1"></i>
+                                Day of Week
+                            </label>
+                            <select class="form-select" id="day_of_week" name="day_of_week">
+                                <option value="Monday">Monday</option>
+                                <option value="Tuesday">Tuesday</option>
+                                <option value="Wednesday">Wednesday</option>
+                                <option value="Thursday">Thursday</option>
+                                <option value="Friday">Friday</option>
+                                <option value="Saturday">Saturday</option>
+                                <option value="Sunday">Sunday</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="is_weekend" class="form-label">
+                                <i class="fas fa-calendar-week me-1"></i>
+                                Weekend Transaction
+                            </label>
+                            <select class="form-select" id="is_weekend" name="is_weekend">
+                                <option value="0">No (Weekday)</option>
+                                <option value="1">Yes (Weekend)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- User Information -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-primary border-bottom pb-2">
+                                <i class="fas fa-users me-2"></i>
+                                User Information
+                            </h5>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="sender_age_group" class="form-label">
+                                <i class="fas fa-user me-1"></i>
+                                Sender Age Group
+                            </label>
+                            <select class="form-select" id="sender_age_group" name="sender_age_group">
+                                <option value="18-25">18-25 years</option>
+                                <option value="26-35" selected>26-35 years</option>
+                                <option value="36-45">36-45 years</option>
+                                <option value="46-55">46-55 years</option>
+                                <option value="56+">56+ years</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="receiver_age_group" class="form-label">
+                                <i class="fas fa-user-friends me-1"></i>
+                                Receiver Age Group
+                            </label>
+                            <select class="form-select" id="receiver_age_group" name="receiver_age_group">
+                                <option value="18-25">18-25 years</option>
+                                <option value="26-35" selected>26-35 years</option>
+                                <option value="36-45">36-45 years</option>
+                                <option value="46-55">46-55 years</option>
+                                <option value="56+">56+ years</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Banking Information -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-primary border-bottom pb-2">
+                                <i class="fas fa-university me-2"></i>
+                                Banking Details
+                            </h5>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="sender_state" class="form-label">
+                                <i class="fas fa-map-marker-alt me-1"></i>
+                                Sender State
+                            </label>
+                            <select class="form-select" id="sender_state" name="sender_state">
+                                <option value="Delhi" selected>Delhi</option>
+                                <option value="Mumbai">Mumbai</option>
+                                <option value="Bangalore">Bangalore</option>
+                                <option value="Chennai">Chennai</option>
+                                <option value="Kolkata">Kolkata</option>
+                                <option value="Hyderabad">Hyderabad</option>
+                                <option value="Pune">Pune</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="sender_bank" class="form-label">
+                                <i class="fas fa-building me-1"></i>
+                                Sender Bank
+                            </label>
+                            <select class="form-select" id="sender_bank" name="sender_bank">
+                                <option value="SBI" selected>State Bank of India</option>
+                                <option value="HDFC">HDFC Bank</option>
+                                <option value="ICICI">ICICI Bank</option>
+                                <option value="Axis">Axis Bank</option>
+                                <option value="PNB">Punjab National Bank</option>
+                                <option value="BOI">Bank of India</option>
+                                <option value="Unknown Bank">Unknown Bank</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="receiver_bank" class="form-label">
+                                <i class="fas fa-building me-1"></i>
+                                Receiver Bank
+                            </label>
+                            <select class="form-select" id="receiver_bank" name="receiver_bank">
+                                <option value="SBI" selected>State Bank of India</option>
+                                <option value="HDFC">HDFC Bank</option>
+                                <option value="ICICI">ICICI Bank</option>
+                                <option value="Axis">Axis Bank</option>
+                                <option value="PNB">Punjab National Bank</option>
+                                <option value="BOI">Bank of India</option>
+                                <option value="Unknown Bank">Unknown Bank</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Technical Information -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="text-primary border-bottom pb-2">
+                                <i class="fas fa-cog me-2"></i>
+                                Technical Details
+                            </h5>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="merchant_category" class="form-label">
+                                <i class="fas fa-store me-1"></i>
+                                Category
+                            </label>
+                            <select class="form-select" id="merchant_category" name="merchant_category">
+                                <option value="Other" selected>Other</option>
+                                <option value="Grocery">Grocery</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Food">Food & Dining</option>
+                                <option value="Shopping">Shopping</option>
+                                <option value="Transport">Transport</option>
+                                <option value="Bills">Bills & Utilities</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="device_type" class="form-label">
+                                <i class="fas fa-mobile-alt me-1"></i>
+                                Device Type
+                            </label>
+                            <select class="form-select" id="device_type" name="device_type">
+                                <option value="Android" selected>Android</option>
+                                <option value="iOS">iOS</option>
+                                <option value="Web">Web Browser</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="transaction_type" class="form-label">
+                                <i class="fas fa-exchange-alt me-1"></i>
+                                Transaction Type
+                            </label>
+                            <select class="form-select" id="transaction_type" name="transaction_type">
+                                <option value="P2P" selected>Person to Person</option>
+                                <option value="P2M">Person to Merchant</option>
+                                <option value="M2P">Merchant to Person</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="network_type" class="form-label">
+                                <i class="fas fa-wifi me-1"></i>
+                                Network Type
+                            </label>
+                            <select class="form-select" id="network_type" name="network_type">
+                                <option value="4G" selected>4G</option>
+                                <option value="5G">5G</option>
+                                <option value="WiFi">WiFi</option>
+                                <option value="3G">3G</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Transaction Status -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <label for="transaction_status" class="form-label">
+                                <i class="fas fa-check-circle me-1"></i>
+                                Transaction Status
+                            </label>
+                            <select class="form-select" id="transaction_status" name="transaction_status">
+                                <option value="SUCCESS" selected>Success</option>
+                                <option value="PENDING">Pending</option>
+                                <option value="FAILED">Failed</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-lg px-5" id="analyzeBtn">
+                            <i class="fas fa-search me-2"></i>
+                            Analyze Transaction
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Quick Examples -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <h5 class="text-center mb-4">Quick Test Examples</h5>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card border-success">
+                    <div class="card-body text-center">
+                        <h6 class="text-success">
+                            <i class="fas fa-check-circle me-1"></i>
+                            Low Risk Example
+                        </h6>
+                        <p class="small text-muted">₹2,500 at 2:00 PM on Tuesday</p>
+                        <button type="button" class="btn btn-outline-success btn-sm" onclick="fillLowRisk()">
+                            Fill Form
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card border-danger">
+                    <div class="card-body text-center">
+                        <h6 class="text-danger">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            High Risk Example
+                        </h6>
+                        <p class="small text-muted">₹95,000 at 3:00 AM on Saturday</p>
+                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="fillHighRisk()">
+                            Fill Form
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+# Configuration for Quantum-Classical Fraud Detection
+
+# Model storage
+models_dir: 'models'
+
+# Quantum kernel settings
+n_qubits: 4
+jitter_std: 0.001
+jitter_repeats: 6  # Reduced for low-latency demo
+
+# API settings
+uncertainty_enabled: true
+
+# Training settings
+train_size: 0.6
+cal_size: 0.2
+# test_size: 0.2 (remainder)
+
+# Feature selection (optional - if not specified, uses defaults)
+# feature_columns:
+#   - amount
+#   - sender_age_group
+#   - merchant_category
+#   - hour_of_day
+#   - is_weekend
+#   - device_type
+
+# Logging
+log_level: INFO

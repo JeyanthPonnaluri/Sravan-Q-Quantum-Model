@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum-Classical Fraud Detection</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .result-card {
+            margin-top: 20px;
+            display: none;
+        }
+        .score-high { color: #dc3545; }
+        .score-medium { color: #fd7e14; }
+        .score-low { color: #198754; }
+        .loading {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <h1 class="text-center mb-4">🔮 Quantum-Classical Fraud Detection</h1>
+                <p class="text-center text-muted">
+                    Advanced fraud detection using quantum kernel SVM, XGBoost, and fusion modeling
+                </p>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Transaction Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="fraudForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="amount" class="form-label">Amount (INR)</label>
+                                        <input type="number" class="form-control" id="amount" name="amount" 
+                                               value="5000" step="0.01" min="0" required>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="sender_age_group" class="form-label">Sender Age Group</label>
+                                        <select class="form-select" id="sender_age_group" name="sender_age_group" required>
+                                            <option value="18-25">18-25</option>
+                                            <option value="26-35" selected>26-35</option>
+                                            <option value="36-50">36-50</option>
+                                            <option value="50+">50+</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="merchant_category" class="form-label">Merchant Category</label>
+                                        <select class="form-select" id="merchant_category" name="merchant_category" required>
+                                            <option value="Grocery" selected>Grocery</option>
+                                            <option value="Fuel">Fuel</option>
+                                            <option value="Food">Food</option>
+                                            <option value="Shopping">Shopping</option>
+                                            <option value="Entertainment">Entertainment</option>
+                                            <option value="Utilities">Utilities</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="hour_of_day" class="form-label">Hour of Day (0-23)</label>
+                                        <input type="number" class="form-control" id="hour_of_day" name="hour_of_day" 
+                                               value="14" min="0" max="23" required>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="is_weekend" class="form-label">Weekend Transaction</label>
+                                        <select class="form-select" id="is_weekend" name="is_weekend" required>
+                                            <option value="0" selected>No</option>
+                                            <option value="1">Yes</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="device_type" class="form-label">Device Type</label>
+                                        <select class="form-select" id="device_type" name="device_type" required>
+                                            <option value="Android" selected>Android</option>
+                                            <option value="iOS">iOS</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="p_logic" class="form-label">Logical Score (Optional, 0-1)</label>
+                                <input type="number" class="form-control" id="p_logic" name="p_logic" 
+                                       step="0.01" min="0" max="1" placeholder="Leave empty for auto-calculation">
+                                <div class="form-text">
+                                    Optional logical/rule-based score from external system or LLM analysis
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    🔍 Analyze Transaction
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <div class="loading text-center mt-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Analyzing...</span>
+                            </div>
+                            <p class="mt-2">Running quantum-classical analysis...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card result-card" id="resultCard">
+                    <div class="card-header">
+                        <h5 class="mb-0">🎯 Fraud Analysis Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">🔮 Quantum Score</label>
+                                    <div class="progress mb-1">
+                                        <div class="progress-bar" id="quantumProgress" role="progressbar"></div>
+                                    </div>
+                                    <small id="quantumScore" class="text-muted">--</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">🤖 Classical Score (XGBoost)</label>
+                                    <div class="progress mb-1">
+                                        <div class="progress-bar bg-info" id="classicalProgress" role="progressbar"></div>
+                                    </div>
+                                    <small id="classicalScore" class="text-muted">--</small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">🧠 Logical Score</label>
+                                    <div class="progress mb-1">
+                                        <div class="progress-bar bg-warning" id="logicalProgress" role="progressbar"></div>
+                                    </div>
+                                    <small id="logicalScore" class="text-muted">--</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">📊 Practical Score (Fusion)</label>
+                                    <div class="progress mb-1">
+                                        <div class="progress-bar bg-success" id="practicalProgress" role="progressbar"></div>
+                                    </div>
+                                    <small id="practicalScore" class="text-muted">--</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <div class="alert" id="riskAlert" role="alert">
+                                    <strong id="riskLevel">Risk Assessment</strong>
+                                    <p id="riskDescription" class="mb-1"></p>
+                                    <small>Uncertainty: ±<span id="uncertainty">--</span>%</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 text-center">
+                    <small class="text-muted">
+                        Powered by PennyLane Quantum Computing • XGBoost • FastAPI
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/script.js"></script>
+</body>
+</html>
