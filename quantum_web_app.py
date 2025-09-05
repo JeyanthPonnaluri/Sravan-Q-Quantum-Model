@@ -14,8 +14,8 @@ from datetime import datetime
 import uvicorn
 import os
 
-# Import our quantum meta model
-from quantum_meta_model import QuantumMetaModel
+# Import our enhanced quantum meta model
+from enhanced_quantum_model import EnhancedQuantumMetaModel
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -39,7 +39,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 # Global model instance
-quantum_model: Optional[QuantumMetaModel] = None
+quantum_model: Optional[EnhancedQuantumMetaModel] = None
 
 # Startup event
 @app.on_event("startup")
@@ -47,9 +47,9 @@ async def startup_event():
     """Initialize the quantum model on startup"""
     global quantum_model
     try:
-        logger.info("Initializing Quantum Meta Model...")
-        quantum_model = QuantumMetaModel()
-        logger.info("Quantum Meta Model initialized successfully")
+        logger.info("Initializing Enhanced Quantum Meta Model...")
+        quantum_model = EnhancedQuantumMetaModel()
+        logger.info("Enhanced Quantum Meta Model initialized successfully")
     except Exception as e:
         logger.error(f"Failed to initialize Quantum Meta Model: {e}")
         raise e

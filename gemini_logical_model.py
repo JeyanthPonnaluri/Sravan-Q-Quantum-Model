@@ -63,13 +63,40 @@ class GeminiLogicalModel:
         self.api_key = api_key
         genai.configure(api_key=api_key)
         
-        # Initialize Gemini model
-        self.model = genai.GenerativeModel('gemini-pro')
+        # Initialize Gemini model (using working model based on quota)
+        try:
+            # Use Gemini 1.5 Flash Latest (works with current quota)
+            self.model = genai.GenerativeModel('gemini-1.5-flash-latest')
+        except Exception as e:
+            try:
+                # Fallback to basic Gemini 1.5 Flash
+                self.model = genai.GenerativeModel('gemini-1.5-flash')
+            except Exception as e2:
+                try:
+                    # Fallback to Gemini 2.0 Flash (if available)
+                    self.model = genai.GenerativeModel('gemini-2.0-flash')
+                except Exception as e3:
+                    logger.error(f"All Gemini models failed: {e}, {e2}, {e3}")
+                    raise Exception("No working Gemini model available")
         
         # Fraud detection knowledge base
         self.fraud_patterns_prompt = self._build_fraud_knowledge_base()
         
-        logger.info("Gemini Logical Model initialized successfully")
+        logger.info(f"Gemini Logical Model initialized successfully with model: {self.model.model_name}")
+    
+    def list_available_models(self):
+        """List available Gemini models"""
+        try:
+            models = genai.list_models()
+            available_models = []
+            for model in models:
+                if 'generateContent' in model.supported_generation_methods:
+                    available_models.append(model.name)
+            logger.info(f"Available Gemini models: {available_models}")
+            return available_models
+        except Exception as e:
+            logger.error(f"Error listing models: {e}")
+            return []
     
     def _build_fraud_knowledge_base(self) -> str:
         """Build comprehensive fraud detection knowledge base"""
