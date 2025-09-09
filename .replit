@@ -16,15 +16,15 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Fraud Detection App"
+args = "Government Fraud System"
 
 [[workflows.workflow]]
-name = "Fraud Detection App"
+name = "Government Fraud System"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python fraud_detection_app.py"
+args = "python government_fraud_system.py"
 waitForPort = 5000
 
 [workflows.workflow.metadata]
