@@ -372,8 +372,496 @@ async def startup_event():
     load_models()
     initialize_gemini()
 
+
 @app.get("/", response_class=HTMLResponse)
 async def home():
+    """Sleek modern landing page for Sravan Q-Quantum Fraud System"""
+    return """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuro-QKAD | Quantum-Classical Fusion Fraud Detection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #070a13;
+            --bg-card: rgba(17, 24, 39, 0.6);
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --secondary: #9333ea;
+            --accent: #06b6d4;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: rgba(255, 255, 255, 0.08);
+            --glow: rgba(99, 102, 241, 0.15);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        
+        /* Grid background */
+        .background-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        /* Glowing Orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--primary);
+            top: -100px;
+            left: -100px;
+        }
+        .orb-2 {
+            width: 500px;
+            height: 500px;
+            background: var(--secondary);
+            bottom: -200px;
+            right: -100px;
+        }
+        .orb-3 {
+            width: 300px;
+            height: 300px;
+            background: var(--accent);
+            top: 40%;
+            left: 60%;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Navbar */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 0;
+        }
+        .brand {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, var(--text-muted) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .brand i {
+            background: linear-gradient(135deg, var(--primary-light), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .nav-links a:hover {
+            color: var(--text-main);
+        }
+
+        /* Hero */
+        .hero {
+            padding: 6rem 0 8rem 0;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .badge {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: var(--primary-light);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        h1.hero-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff 30%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            max-width: 900px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 650px;
+            margin-bottom: 3rem;
+        }
+
+        .cta-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 1.1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 9999px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+        
+        .cta-btn:hover::before {
+            transform: translateX(100%);
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 35px -5px rgba(99, 102, 241, 0.6);
+        }
+
+        /* Features */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 8rem;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.2);
+        }
+
+        .icon-wrapper {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary-light);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover .icon-wrapper {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-color: transparent;
+        }
+
+        .feature-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .feature-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Details section */
+        .detail-section {
+            display: flex;
+            gap: 4rem;
+            align-items: center;
+            margin-bottom: 8rem;
+        }
+        .detail-content {
+            flex: 1;
+        }
+        .detail-content h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+        .detail-content p {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+        
+        .bullets {
+            list-style: none;
+        }
+        .bullets li {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-main);
+        }
+        .bullets li i {
+            color: var(--accent);
+        }
+
+        .detail-visual {
+            flex: 1;
+            background: radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 70%);
+            border-radius: 20px;
+            padding: 3rem;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        /* Dashboard Preview Mockup */
+        .mockup-ui {
+            width: 100%;
+            background: #111827;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .mockup-header {
+            background: #1f2937;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .mockup-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .mockup-dot.dot-red { background: #ef4444; }
+        .mockup-dot.dot-yellow { background: #f59e0b; }
+        .mockup-dot.dot-green { background: #10b981; }
+        
+        .mockup-body {
+            padding: 1.5rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #10b981;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 3rem 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 968px) {
+            .detail-section {
+                flex-direction: column;
+                gap: 3rem;
+            }
+            h1.hero-title {
+                font-size: 2.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-grid"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="container">
+        <!-- Navbar -->
+        <nav>
+            <div class="brand">
+                <i class="fas fa-microchip"></i> NEURO-QKAD
+            </div>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#technology">Technology</a></li>
+                <li><a href="/dashboard">Launch Dashboard</a></li>
+            </ul>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="badge">
+                <i class="fas fa-shield-halved"></i> Government Security Clearance
+            </div>
+            <h1 class="hero-title">Next-Gen Quantum-Classical Fraud Detection</h1>
+            <p class="hero-subtitle">
+                Neuro-QKAD secures transactions using quantum kernel mapping, machine learning classifiers, and Google Gemini AI reasoning.
+            </p>
+            <a href="/dashboard" class="cta-btn">
+                Launch Government Dashboard <i class="fas fa-arrow-right"></i>
+            </a>
+        </section>
+
+        <!-- Features Grid -->
+        <section id="features" class="features-grid">
+            <div class="feature-card">
+                <div class="icon-wrapper">
+                    <i class="fas fa-atom"></i>
+                </div>
+                <h3 class="feature-title">Quantum SVM</h3>
+                <p class="feature-desc">Uses RY rotations & CNOT entanglements to project transactions into high-dimensional Hilbert space for anomaly separation.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="icon-wrapper">
+                    <i class="fas fa-network-wired"></i>
+                </div>
+                <h3 class="feature-title">Classical XGBoost</h3>
+                <p class="feature-desc">Analyzes velocity and categorical metrics against standard transaction baselines with gradient boosted trees.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon-wrapper">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3 class="feature-title">Gemini AI Reasoning</h3>
+                <p class="feature-desc">Generates human-readable security risk summaries and evaluates semantic fraud context with LLM inference.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon-wrapper">
+                    <i class="fas fa-link"></i>
+                </div>
+                <h3 class="feature-title">Blockchain Ledger</h3>
+                <p class="feature-desc">Tamper-proof SQLite-backed local blockchain for government audit and cryptographic logging of alerts.</p>
+            </div>
+        </section>
+
+        <!-- Detail Section -->
+        <section id="technology" class="detail-section">
+            <div class="detail-content">
+                <h2>Four-Tier Meta-Fusion Platform</h2>
+                <p>
+                    Instead of relying on a single detection engine, Neuro-QKAD utilizes a weighted meta-fusion voting system to aggregate classical, quantum, heuristic, and semantic predictions.
+                </p>
+                <ul class="bullets">
+                    <li><i class="fas fa-check-circle"></i> Quantum-Enhanced Pattern Boundaries</li>
+                    <li><i class="fas fa-check-circle"></i> Elder Abuse and Late Night Velocity Guardrails</li>
+                    <li><i class="fas fa-check-circle"></i> Tamper-Proof Audit Logging and Consensus</li>
+                    <li><i class="fas fa-check-circle"></i> Human-in-the-Loop Explanations with Gemini Flash</li>
+                </ul>
+            </div>
+            <div class="detail-visual">
+                <div class="mockup-ui">
+                    <div class="mockup-header">
+                        <div class="mockup-dot dot-red"></div>
+                        <div class="mockup-dot dot-yellow"></div>
+                        <div class="mockup-dot dot-green"></div>
+                        <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: auto;">blockchain_consensus.log</span>
+                    </div>
+                    <div class="mockup-body">
+                        <p>> Initializing local node consensus...</p>
+                        <p style="color: #6366f1;">> Quantum State ry(x1) cnot ry(x2) ...</p>
+                        <p style="color: #a855f7;">> XGBoost score: 0.887 (HIGH RISK)</p>
+                        <p style="color: #22d3ee;">> Gemini reasoning: suspicious velocity identified...</p>
+                        <p style="color: #10b981;">> Block #47 mined successfully [0003bfa7...]</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 Neuro-QKAD. All rights reserved. Classified Government Security System.</p>
+        </footer>
+    </div>
+</body>
+</html>"""
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard():
     """Government-level professional interface"""
     return """
     <!DOCTYPE html>
@@ -846,9 +1334,14 @@ async def home():
                         <div class="header-subtitle">Advanced AI-Powered Financial Security Platform</div>
                     </div>
                 </div>
-                <div class="security-badge">
-                    <i class="fas fa-shield-alt"></i>
-                    <span>Classified</span>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <a href="/" style="color: white; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.1); padding: 0.5rem 1rem; border-radius: 8px; font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.2);">
+                        <i class="fas fa-arrow-left"></i> Landing Page
+                    </a>
+                    <div class="security-badge">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Classified</span>
+                    </div>
                 </div>
             </div>
         </header>
