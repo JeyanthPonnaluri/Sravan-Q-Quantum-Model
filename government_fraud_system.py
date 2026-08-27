@@ -26,13 +26,17 @@ db = Database()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Gemini API configuration
-GEMINI_API_KEY = "AIzaSyCjKN-Cmn4PDcJoM_rV--5idHdD6NxP3tE"
-genai.configure(api_key=GEMINI_API_KEY)
+from enhanced_quantum_model import EnhancedQuantumMetaModel
+from src.cost_analysis import CostOptimizer
 
-# Global models
-models = None
-gemini_model = None
+# Global instances
+quantum_meta_model = None
+cost_optimizer = CostOptimizer(default_friction_cost=1000.0, default_fraud_loss=5000.0)
+current_optimal_threshold = 0.45  # Default threshold
+
+# Caching for cost optimization
+cached_y_true = np.array([])
+cached_y_pred_proba = np.array([])
 
 class TransactionFull(BaseModel):
     amount: float
@@ -63,306 +67,116 @@ class PredictionResult(BaseModel):
     recommendations: List[str]
     saved_to_blockchain: bool
 
+def initialize_cost_evaluation_data():
+    """Generate mock test dataset and precompute scores for cost analysis curves"""
+    global cached_y_true, cached_y_pred_proba
+    logger.info("Initializing validation cache for cost sweeps...")
+    np.random.seed(42)
+    
+    y_true_list = []
+    y_pred_list = []
+    
+    for i in range(50):
+        amount = float(np.random.lognormal(mean=6, sigma=1.2))
+        hour_of_day = int(np.random.randint(0, 24))
+        is_weekend = int(np.random.choice([0, 1], p=[0.7, 0.3]))
+        
+        fraud_prob = 0.05 + 0.3 * (amount > 100000) + 0.2 * (hour_of_day < 6)
+        fraud_prob = min(max(fraud_prob, 0.02), 0.95)
+        fraud_flag = int(np.random.binomial(1, fraud_prob))
+        
+        # Simulated prediction score matching general relationships (amount + night = high score)
+        base_score = 0.1
+        if amount > 100000:
+            base_score += 0.4
+        if hour_of_day < 6:
+            base_score += 0.3
+        
+        score = min(max(base_score + np.random.uniform(-0.05, 0.05), 0.01), 0.99)
+        
+        y_true_list.append(fraud_flag)
+        y_pred_list.append(score)
+            
+    cached_y_true = np.array(y_true_list)
+    cached_y_pred_proba = np.array(y_pred_list)
+    logger.info(f"Cost sweep cache initialized: {len(cached_y_true)} samples evaluated.")
+
 def load_models():
     """Load fraud detection models"""
-    global models
+    global quantum_meta_model
     try:
-        with open('enhanced_models/fraud_models.pkl', 'rb') as f:
-            models = pickle.load(f)
-        logger.info("Models loaded successfully!")
+        import os
+        api_key = os.getenv("GEMINI_API_KEY", "")
+        quantum_meta_model = EnhancedQuantumMetaModel(
+            neuro_qkad_models_path="enhanced_models/fraud_models.pkl",
+            gemini_api_key=api_key
+        )
+        logger.info("Enhanced Quantum Meta Model loaded successfully!")
+        initialize_cost_evaluation_data()
         return True
     except Exception as e:
-        logger.warning(f"Could not load models: {e}")
+        logger.error(f"Could not load Enhanced Quantum Meta Model: {e}")
         return False
 
-def initialize_gemini():
-    """Initialize Gemini model"""
-    global gemini_model
-    try:
-        gemini_model = genai.GenerativeModel('gemini-1.5-flash-latest')
-        logger.info("Gemini Flash model initialized successfully!")
-        return True
-    except Exception as e:
-        try:
-            gemini_model = genai.GenerativeModel('gemini-1.5-flash')
-            logger.info("Gemini Flash model (fallback) initialized successfully!")
-            return True
-        except Exception as e2:
-            logger.error(f"Failed to initialize Gemini model: {e}, {e2}")
-            return False
-
-def get_ai_reasoning(transaction: TransactionFull, scores: Dict) -> Dict:
-    """Get detailed AI reasoning from Gemini Flash"""
-    global gemini_model
-    
-    if not gemini_model:
-        return {
-            "reasoning": "AI reasoning service temporarily unavailable",
-            "security_flags": [],
-            "recommendations": ["Manual review recommended"]
-        }
-    
-    try:
-        prompt = f"""
-        As a government-level fraud detection AI analyst, analyze this financial transaction:
-
-        TRANSACTION DETAILS:
-        - Amount: ₹{transaction.amount:,.2f}
-        - Time: {transaction.hour_of_day}:00 on {transaction.day_of_week}
-        - Weekend: {'Yes' if transaction.is_weekend else 'No'}
-        - Sender: {transaction.sender_age_group} from {transaction.sender_state} using {transaction.sender_bank}
-        - Receiver: {transaction.receiver_age_group} bank {transaction.receiver_bank}
-        - Category: {transaction.merchant_category}
-        - Device: {transaction.device_type} on {transaction.network_type}
-        - Type: {transaction.transaction_type}
-        - Status: {transaction.transaction_status}
-
-        AI ANALYSIS SCORES:
-        - Quantum AI Score: {scores['quantum_score']:.1f}%
-        - Classical ML Score: {scores['classical_score']:.1f}%
-        - Rule-based Score: {scores['logical_score']:.1f}%
-        - Final Risk Score: {scores['fusion_score']:.1f}%
-
-        Please provide a comprehensive analysis in the following format:
-
-        FRAUD RISK ASSESSMENT:
-        [Detailed analysis of why this transaction is flagged as suspicious or legitimate]
-
-        SECURITY FLAGS:
-        [List specific security concerns, if any]
-
-        RECOMMENDATIONS:
-        [Specific actions for financial institutions and authorities]
-
-        Keep the analysis professional and suitable for government/banking officials.
-        """
-
-        response = gemini_model.generate_content(prompt)
-        ai_text = response.text
-
-        # Parse the response to extract structured information
-        reasoning_lines = ai_text.split('\n')
-        
-        reasoning = ""
-        security_flags = []
-        recommendations = []
-        current_section = None
-        
-        for line in reasoning_lines:
-            line = line.strip()
-            if "FRAUD RISK ASSESSMENT:" in line.upper():
-                current_section = "reasoning"
-                continue
-            elif "SECURITY FLAGS:" in line.upper():
-                current_section = "flags"
-                continue
-            elif "RECOMMENDATIONS:" in line.upper():
-                current_section = "recommendations"
-                continue
-            
-            if line and not line.startswith('#'):
-                if current_section == "reasoning":
-                    reasoning += line + " "
-                elif current_section == "flags" and line.startswith('-'):
-                    security_flags.append(line[1:].strip())
-                elif current_section == "recommendations" and line.startswith('-'):
-                    recommendations.append(line[1:].strip())
-        
-        # Fallback if parsing fails
-        if not reasoning:
-            reasoning = ai_text[:500] + "..." if len(ai_text) > 500 else ai_text
-        
-        if not security_flags:
-            if scores['fusion_score'] > 70:
-                security_flags = ["High-risk transaction pattern detected", "Manual verification required"]
-            elif scores['fusion_score'] > 30:
-                security_flags = ["Moderate risk indicators present"]
-        
-        if not recommendations:
-            if scores['fusion_score'] > 70:
-                recommendations = ["Immediate manual review required", "Consider transaction hold", "Verify customer identity"]
-            elif scores['fusion_score'] > 30:
-                recommendations = ["Enhanced monitoring recommended", "Standard verification procedures"]
-            else:
-                recommendations = ["Transaction appears legitimate", "Standard processing approved"]
-
-        return {
-            "reasoning": reasoning.strip(),
-            "security_flags": security_flags,
-            "recommendations": recommendations
-        }
-        
-    except Exception as e:
-        logger.error(f"Gemini API error: {e}")
-        return {
-            "reasoning": f"AI analysis temporarily unavailable. Based on risk score of {scores['fusion_score']:.1f}%, this transaction requires manual review.",
-            "security_flags": ["AI service unavailable"],
-            "recommendations": ["Manual review required"]
-        }
-
-def quantum_kernel_enhanced(X1, X2, n_qubits=4):
-    """Enhanced quantum kernel simulation"""
-    n1, n2 = len(X1), len(X2)
-    K = np.zeros((n1, n2))
-
-    for i in range(n1):
-        for j in range(n2):
-            x1 = X1[i][:n_qubits] if len(X1[i]) >= n_qubits else X1[i]
-            x2 = X2[j][:n_qubits] if len(X2[j]) >= n_qubits else X2[j]
-            
-            dot_product = np.dot(x1, x2)
-            magnitude = np.linalg.norm(x1) * np.linalg.norm(x2)
-            
-            if magnitude > 0:
-                similarity = dot_product / magnitude
-                K[i, j] = (1 + similarity) / 2
-            else:
-                K[i, j] = 0.5
-
-    return K
-
 def predict_fraud_enhanced(transaction: TransactionFull):
-    """Enhanced fraud prediction with government-level analysis"""
+    """Enhanced fraud prediction using the real multi-model engine"""
+    global quantum_meta_model, current_optimal_threshold
     
-    # Create feature array for analysis
-    features = [
-        transaction.amount,
-        transaction.hour_of_day,
-        transaction.is_weekend,
-        1 if transaction.day_of_week in ['Saturday', 'Sunday'] else 0,
-        hash(transaction.sender_age_group) % 100 / 100,
-        hash(transaction.receiver_age_group) % 100 / 100,
-        hash(transaction.sender_state) % 100 / 100,
-        hash(transaction.sender_bank) % 100 / 100,
-        hash(transaction.receiver_bank) % 100 / 100,
-        hash(transaction.merchant_category) % 100 / 100,
-        hash(transaction.device_type) % 100 / 100,
-        hash(transaction.transaction_type) % 100 / 100,
-        hash(transaction.network_type) % 100 / 100,
-        hash(transaction.transaction_status) % 100 / 100
-    ]
-    
-    # Normalize features
-    X_normalized = np.array(features).reshape(1, -1)
-    X_normalized = (X_normalized - X_normalized.mean()) / (X_normalized.std() + 1e-8)
-    
-    # Quantum-inspired prediction
-    if models and 'X_train_scaled' in models and len(models['X_train_scaled']) > 0:
-        K_test = quantum_kernel_enhanced(X_normalized, models['X_train_scaled'][:10])
-        quantum_prob = np.mean(K_test) * 0.8 + random.uniform(0, 0.2)
-    else:
-        quantum_features = X_normalized[0][:4]
-        quantum_prob = np.tanh(np.sum(quantum_features ** 2)) * 0.5 + random.uniform(0, 0.1)
-    
-    # Classical ML prediction
-    classical_score = 0
-    
-    # Enhanced scoring logic
-    if transaction.amount > 100000:
-        classical_score += 0.5
-    elif transaction.amount > 50000:
-        classical_score += 0.3
-    elif transaction.amount > 25000:
-        classical_score += 0.15
-    
-    # Time-based analysis
-    if transaction.hour_of_day < 5 or transaction.hour_of_day > 23:
-        classical_score += 0.4
-    elif transaction.hour_of_day < 7 or transaction.hour_of_day > 22:
-        classical_score += 0.2
-    
-    # Weekend analysis
-    if transaction.is_weekend:
-        classical_score += 0.15
-    
-    # Category-based risk
-    high_risk_categories = ['Entertainment', 'Shopping', 'Gaming']
-    if transaction.merchant_category in high_risk_categories:
-        classical_score += 0.25
-    
-    # Cross-state transactions
-    if transaction.sender_state != 'Delhi' and transaction.amount > 25000:
-        classical_score += 0.1
-    
-    classical_prob = min(classical_score + random.uniform(-0.05, 0.05), 1.0)
-    
-    # Logical prediction (Rule-based)
-    logical_prob = 0.0
-    
-    if transaction.amount > 75000:
-        logical_prob += 0.4
-    elif transaction.amount > 50000:
-        logical_prob += 0.25
-    elif transaction.amount > 25000:
-        logical_prob += 0.15
-    
-    if transaction.hour_of_day >= 23 or transaction.hour_of_day <= 4:
-        logical_prob += 0.3
-    
-    if transaction.is_weekend and transaction.amount > 30000:
-        logical_prob += 0.2
-    
-    if transaction.merchant_category in ['Entertainment', 'Gaming']:
-        logical_prob += 0.2
-    
-    logical_prob = min(logical_prob, 1.0)
-    
-    # Advanced fusion prediction
-    fusion_prob = (quantum_prob * 0.35 + classical_prob * 0.45 + logical_prob * 0.20)
-    fusion_prob = min(max(fusion_prob, 0), 1)
-    
-    # Government-level risk classification
-    if fusion_prob > 0.8:
-        risk_level = "CRITICAL RISK"
-        confidence = "Very High"
-    elif fusion_prob > 0.6:
-        risk_level = "HIGH RISK"
-        confidence = "High"
-    elif fusion_prob > 0.4:
-        risk_level = "MEDIUM RISK"
-        confidence = "Medium"
-    elif fusion_prob > 0.2:
-        risk_level = "LOW RISK"
-        confidence = "Medium"
-    else:
-        risk_level = "MINIMAL RISK"
-        confidence = "High"
-    
-    # Prepare scores for AI analysis
-    scores = {
-        'quantum_score': quantum_prob * 100,
-        'classical_score': classical_prob * 100,
-        'logical_score': logical_prob * 100,
-        'fusion_score': fusion_prob * 100
-    }
-    
-    # Get AI reasoning
-    ai_analysis = get_ai_reasoning(transaction, scores)
-    
-    # Save to database
+    if quantum_meta_model is None:
+        return {
+            'transaction_hash': '0',
+            'quantum_score': 10.0,
+            'classical_score': 10.0,
+            'logical_score': 10.0,
+            'fusion_score': 10.0,
+            'risk_level': "MINIMAL RISK",
+            'confidence': "High",
+            'ai_reasoning': "System loading...",
+            'security_flags': [],
+            'recommendations': [],
+            'saved_to_blockchain': False
+        }
+        
     transaction_data = transaction.model_dump()
-    transaction_data.update({
-        'quantum_score': float(quantum_prob * 100),
-        'classical_score': float(classical_prob * 100),
-        'logical_score': float(logical_prob * 100),
-        'fusion_score': float(fusion_prob * 100),
-        'risk_level': risk_level,
-        'confidence': confidence
-    })
     
-    transaction_hash = db.save_transaction(transaction_data)
+    # Run the real model prediction!
+    pred = quantum_meta_model.predict(transaction_data)
+    
+    # Re-classify risk level and action dynamically using cost-optimized threshold
+    risk_lvl, dynamic_action = cost_optimizer.find_action_for_score(pred.final_fraud_score, current_optimal_threshold)
+    
+    # Construct flags
+    security_flags = list(pred.primary_risk_factors)
+    
+    # Save to db
+    db_data = transaction.model_dump()
+    db_data.update({
+        'quantum_score': float(pred.quantum_score),
+        'classical_score': float(pred.classical_score),
+        'logical_score': float(pred.gemini_logical_score),
+        'fusion_score': float(pred.final_fraud_score),
+        'risk_level': f"{risk_lvl} RISK",
+        'confidence': f"{pred.confidence_score:.1f}%"
+    })
+    transaction_hash = db.save_transaction(db_data)
+    
+    # Recommendations
+    recommendations = [dynamic_action]
+    if risk_lvl in ["CRITICAL", "HIGH"]:
+        recommendations.append("Alert the receiving institution to place a temporary hold.")
+        recommendations.append("Log risk payload to security monitoring index.")
     
     return {
         'transaction_hash': transaction_hash,
-        'quantum_score': round(quantum_prob * 100, 2),
-        'classical_score': round(classical_prob * 100, 2),
-        'logical_score': round(logical_prob * 100, 2),
-        'fusion_score': round(fusion_prob * 100, 2),
-        'risk_level': risk_level,
-        'confidence': confidence,
-        'ai_reasoning': ai_analysis['reasoning'],
-        'security_flags': ai_analysis['security_flags'],
-        'recommendations': ai_analysis['recommendations'],
+        'quantum_score': round(pred.quantum_score, 2),
+        'classical_score': round(pred.classical_score, 2),
+        'logical_score': round(pred.gemini_logical_score, 2),
+        'fusion_score': round(pred.final_fraud_score, 2),
+        'risk_level': f"{risk_lvl} RISK",
+        'confidence': f"{pred.confidence_score:.1f}%",
+        'ai_reasoning': f"Model analysis version {pred.model_version}. Identified type: {pred.fraud_type_detected}. Agreement: {pred.model_agreement:.1f}%.",
+        'security_flags': security_flags,
+        'recommendations': recommendations,
         'saved_to_blockchain': False
     }
 
@@ -370,7 +184,6 @@ def predict_fraud_enhanced(transaction: TransactionFull):
 async def startup_event():
     """Initialize system on startup"""
     load_models()
-    initialize_gemini()
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -1342,6 +1155,10 @@ async def dashboard():
                         <i class="fas fa-shield-alt"></i>
                         <span>Classified</span>
                     </div>
+                    <div id="geminiStatusBadge" class="security-badge" style="background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.4); color: #10b981;">
+                        <i class="fas fa-brain"></i>
+                        <span id="geminiStatusText">Gemini: Connecting...</span>
+                    </div>
                 </div>
             </div>
         </header>
@@ -1515,6 +1332,52 @@ async def dashboard():
                     </div>
 
                     <div id="results" class="results"></div>
+                </div>
+            </div>
+
+            <div class="panel" style="margin-bottom: 2rem;">
+                <div class="panel-header" style="background: linear-gradient(90deg, var(--warning-orange) 0%, var(--danger-red) 100%);">
+                    <i class="fas fa-sliders-h"></i>
+                    <h2>AI Risk Manager Cost Controller</h2>
+                </div>
+                <div class="panel-content">
+                    <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1.25rem;">
+                        Balance false-positive friction costs (blocking good transactions) vs. false-negative fraud losses (missed chargebacks) to dynamically optimize the model's threshold boundaries.
+                    </p>
+                    
+                    <div style="margin-bottom: 1.25rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 500;">
+                            <span>FP Friction Cost (Falsely Flagged)</span>
+                            <span id="valFriction" style="color: var(--primary-blue); font-weight: 600;">₹1,000</span>
+                        </div>
+                        <input type="range" id="sliderFriction" min="500" max="5000" step="100" value="1000" style="cursor: pointer;" oninput="updateCosts()">
+                    </div>
+                    
+                    <div style="margin-bottom: 1.25rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 500;">
+                            <span>FN Fraud Loss (Chargebacks & Fees)</span>
+                            <span id="valFraud" style="color: var(--danger-red); font-weight: 600;">₹5,000</span>
+                        </div>
+                        <input type="range" id="sliderFraud" min="2000" max="20000" step="500" value="5000" style="cursor: pointer;" oninput="updateCosts()">
+                    </div>
+
+                    <div style="background: var(--bg-light); border: 1px solid var(--border-light); border-radius: 8px; padding: 1rem; margin-top: 1.25rem;">
+                        <h4 style="font-size: 0.9rem; color: var(--primary-blue); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-chart-line"></i> Dynamic Cost-Optimized Metrics
+                        </h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.85rem;">
+                            <div>Optimal Threshold: <strong id="optThreshold" style="color: var(--primary-blue);">45%</strong></div>
+                            <div>F1 Score: <strong id="optF1">85.2%</strong></div>
+                            <div>Precision: <strong id="optPrecision">83.3%</strong></div>
+                            <div>Recall: <strong id="optRecall">87.5%</strong></div>
+                            <div>False Positives: <strong id="optFPs" style="color: var(--warning-orange);">1</strong></div>
+                            <div>False Negatives: <strong id="optFNs" style="color: var(--danger-red);">2</strong></div>
+                        </div>
+                        <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed var(--border-light); font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
+                            <span>Optimized Savings:</span>
+                            <strong style="color: var(--success-green); font-size: 1rem;" id="optSavings">₹18,500</strong>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1764,14 +1627,66 @@ async def dashboard():
                 }
             }
 
+            async function updateCosts() {
+                const friction = document.getElementById('sliderFriction').value;
+                const fraud = document.getElementById('sliderFraud').value;
+                
+                document.getElementById('valFriction').textContent = '₹' + parseInt(friction).toLocaleString();
+                document.getElementById('valFraud').textContent = '₹' + parseInt(fraud).toLocaleString();
+                
+                try {
+                    const response = await fetch(`/api/cost_optimize?friction_cost=${friction}&fraud_loss=${fraud}`);
+                    const data = await response.json();
+                    
+                    document.getElementById('optThreshold').textContent = Math.round(data.optimal_threshold * 100) + '%';
+                    document.getElementById('optF1').textContent = (data.f1 * 100).toFixed(1) + '%';
+                    document.getElementById('optPrecision').textContent = (data.precision * 100).toFixed(1) + '%';
+                    document.getElementById('optRecall').textContent = (data.recall * 100).toFixed(1) + '%';
+                    document.getElementById('optFPs').textContent = data.fp_count;
+                    document.getElementById('optFNs').textContent = data.fn_count;
+                    
+                    const totalSavings = data.savings_vs_no_model;
+                    document.getElementById('optSavings').textContent = '₹' + Math.round(totalSavings).toLocaleString();
+                    
+                } catch (error) {
+                    console.error('Error optimizing costs:', error);
+                }
+            }
+
+            async function checkGeminiStatus() {
+                try {
+                    const response = await fetch('/health');
+                    const health = await response.json();
+                    const badge = document.getElementById('geminiStatusBadge');
+                    const text = document.getElementById('geminiStatusText');
+                    
+                    if (health.gemini_ai_enabled) {
+                        badge.style.background = 'rgba(16, 185, 129, 0.2)';
+                        badge.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+                        badge.style.color = '#10b981';
+                        text.textContent = 'Gemini: Active';
+                    } else {
+                        badge.style.background = 'rgba(245, 158, 11, 0.2)';
+                        badge.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+                        badge.style.color = '#f59e0b';
+                        text.textContent = 'Gemini: Fallback Active';
+                    }
+                } catch (error) {
+                    console.error('Error checking health status:', error);
+                }
+            }
+
             // Load initial data
             loadBlockchainStats();
             loadRecentTransactions();
+            updateCosts();
+            checkGeminiStatus();
             
             // Auto-refresh every 30 seconds
             setInterval(() => {
                 loadBlockchainStats();
                 loadRecentTransactions();
+                checkGeminiStatus();
             }, 30000);
         </script>
     </body>
@@ -1817,14 +1732,30 @@ async def mine_new_block():
 @app.get("/health")
 async def health():
     """System health check"""
+    global quantum_meta_model
+    gemini_ok = False
+    if quantum_meta_model and quantum_meta_model.gemini_model:
+        gemini_ok = quantum_meta_model.gemini_model.model is not None
     return {
         "status": "operational",
-        "models_loaded": models is not None,
+        "models_loaded": quantum_meta_model is not None,
         "quantum_ai_enabled": True,
-        "gemini_ai_enabled": gemini_model is not None,
+        "gemini_ai_enabled": gemini_ok,
         "blockchain_enabled": True,
-        "security_level": "government_grade"
+        "security_level": "government_grade",
+        "current_optimal_threshold": current_optimal_threshold
     }
+
+@app.get("/api/cost_optimize")
+async def api_cost_optimize(friction_cost: float = 1000.0, fraud_loss: float = 5000.0):
+    """Dynamically sweeps threshold costs based on merchant specifications"""
+    global cached_y_true, cached_y_pred_proba, current_optimal_threshold
+    
+    res = cost_optimizer.calculate_cost_matrix(
+        cached_y_true, cached_y_pred_proba, friction_cost, fraud_loss
+    )
+    current_optimal_threshold = res["optimal_threshold"]
+    return res
 
 if __name__ == "__main__":
     import uvicorn

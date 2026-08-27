@@ -63,7 +63,7 @@ class EnhancedQuantumMetaModel:
     
     def __init__(self, 
                  neuro_qkad_models_path: str = "enhanced_models/fraud_models.pkl",
-                 gemini_api_key: str = "AIzaSyCjKN-Cmn4PDcJoM_rV--5idHdD6NxP3tE"):
+                 gemini_api_key: str = ""):
         """
         Initialize the Enhanced Quantum Meta Model
         """
@@ -73,7 +73,9 @@ class EnhancedQuantumMetaModel:
         self.neuro_qkad_models = self._load_neuro_qkad_models(neuro_qkad_models_path)
         
         # Initialize Gemini logical model
-        self.gemini_model = GeminiLogicalModel(gemini_api_key)
+        import os
+        api_key = os.getenv("GEMINI_API_KEY", gemini_api_key)
+        self.gemini_model = GeminiLogicalModel(api_key)
         
         # Enhanced meta-learning weights
         self.meta_weights = {
@@ -168,6 +170,16 @@ class EnhancedQuantumMetaModel:
                 ),
                 'score': 96,
                 'description': 'Elder fraud to unknown bank'
+            },
+            'chargeback_risk_pattern': {
+                'conditions': lambda data: data.get('merchant_category') in ['Entertainment', 'Gaming'] and data.get('network_type') == 'WiFi' and data.get('amount', 0) > 35000,
+                'score': 80,
+                'description': 'High chargeback risk: Card-not-present transaction on public/WiFi network'
+            },
+            'returns_abuse_pattern': {
+                'conditions': lambda data: data.get('merchant_category') in ['Grocery', 'Fuel'] and data.get('sender_age_group') == '18-25' and data.get('amount', 0) > 50000 and data.get('is_weekend', 0) == 1,
+                'score': 70,
+                'description': 'Friendly return abuse risk profile: High value weekend retail purchase by young sender'
             }
         }
     

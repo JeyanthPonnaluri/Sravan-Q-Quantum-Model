@@ -65,12 +65,12 @@ class GeminiLogicalModel:
         
         # Initialize Gemini model (using working model based on quota)
         try:
-            # Use Gemini 1.5 Flash Latest (works with current quota)
-            self.model = genai.GenerativeModel('gemini-1.5-flash-latest')
+            # Use Gemini 1.5 Flash (works with current quota and API version)
+            self.model = genai.GenerativeModel('gemini-1.5-flash')
         except Exception as e:
             try:
-                # Fallback to basic Gemini 1.5 Flash
-                self.model = genai.GenerativeModel('gemini-1.5-flash')
+                # Fallback to basic Gemini 1.5 Flash Latest
+                self.model = genai.GenerativeModel('gemini-1.5-flash-latest')
             except Exception as e2:
                 try:
                     # Fallback to Gemini 2.0 Flash (if available)
@@ -450,7 +450,7 @@ def create_transaction_context(transaction_data: Dict[str, Any]) -> TransactionC
 # Example usage and testing
 if __name__ == "__main__":
     # Initialize model
-    API_KEY = "AIzaSyCjKN-Cmn4PDcJoM_rV--5idHdD6NxP3tE"
+    API_KEY = ""
     gemini_model = GeminiLogicalModel(API_KEY)
     
     # Test transaction

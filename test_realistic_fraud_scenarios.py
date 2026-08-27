@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
-"""
-Test Realistic Fraud Scenarios
-Demonstrates the enhanced fraud detection capabilities
-"""
+import sys
+import io
+
+# Force UTF-8 encoding on stdout for Windows compatibility
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 from enhanced_quantum_model import EnhancedQuantumMetaModel
 
