@@ -194,280 +194,482 @@ async def home():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sravan | Crafting Digital Experiences That Matter</title>
-    <!-- Tailwind CSS v2 Fallback (pure CSS, never blocked by Brave Shields) -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <!-- Tailwind CSS v4 JIT compiler (jsDelivr CDN, bypasses Brave shield blocks) -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Lucide Icons (jsDelivr CDN, reliable loading) -->
-    <script src="https://cdn.jsdelivr.net/npm/lucide/dist/umd/lucide.min.js"></script>
+    <title>Neuro-QKAD | Quantum-Classical Fusion Fraud Detection</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-      /* Fallback styles in case Tailwind JIT script is blocked by Brave Shields */
-      body {
-        background-color: #09090b !important;
-        color: #ffffff !important;
-        font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif;
-      }
-      .bg-zinc-950 { background-color: #09090b !important; }
-      .text-zinc-400 { color: #a1a1aa !important; }
-      .text-zinc-300 { color: #d4d4d8 !important; }
-      .text-zinc-500 { color: #71717a !important; }
-      .border-white\/10 { border-color: rgba(255, 255, 255, 0.1) !important; }
-      .bg-white\/5 { background-color: rgba(255, 255, 255, 0.05) !important; }
-      .backdrop-blur-md { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-      .backdrop-blur-xl { backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
-      /* Ensure links look like buttons if Tailwind JIT isn't running */
-      a.group, button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 1rem 2rem;
-        border-radius: 9999px;
-        font-weight: 600;
-        text-decoration: none !important;
-        transition: all 0.2s ease;
-      }
-      a.bg-white {
-        background-color: #ffffff !important;
-        color: #09090b !important;
-      }
-      a.border-white\/10 {
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: #ffffff !important;
-      }
+        :root {
+            --bg-dark: #070a13;
+            --bg-card: rgba(17, 24, 39, 0.6);
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --secondary: #9333ea;
+            --accent: #06b6d4;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: rgba(255, 255, 255, 0.08);
+            --glow: rgba(99, 102, 241, 0.15);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        
+        /* Grid background */
+        .background-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        /* Glowing Orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--primary);
+            top: -100px;
+            left: -100px;
+        }
+        .orb-2 {
+            width: 500px;
+            height: 500px;
+            background: var(--secondary);
+            bottom: -200px;
+            right: -100px;
+        }
+        .orb-3 {
+            width: 300px;
+            height: 300px;
+            background: var(--accent);
+            top: 40%;
+            left: 60%;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Navbar */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 0;
+        }
+        .brand {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, var(--text-muted) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .brand i {
+            background: linear-gradient(135deg, var(--primary-light), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .nav-links a:hover {
+            color: var(--text-main);
+        }
+
+        /* Hero */
+        .hero {
+            padding: 6rem 0 8rem 0;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .badge {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: var(--primary-light);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        h1.hero-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff 30%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            max-width: 900px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 650px;
+            margin-bottom: 3rem;
+        }
+
+        .cta-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 1.1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 9999px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+        
+        .cta-btn:hover::before {
+            transform: translateX(100%);
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 35px -5px rgba(99, 102, 241, 0.6);
+        }
+
+        /* Features */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 8rem;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.2);
+        }
+
+        .icon-wrapper {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary-light);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover .icon-wrapper {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-color: transparent;
+        }
+
+        .feature-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .feature-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Details section */
+        .detail-section {
+            display: flex;
+            gap: 4rem;
+            align-items: center;
+            margin-bottom: 8rem;
+        }
+        .detail-content {
+            flex: 1;
+        }
+        .detail-content h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+        .detail-content p {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+        
+        .bullets {
+            list-style: none;
+        }
+        .bullets li {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-main);
+        }
+        .bullets li i {
+            color: var(--accent);
+        }
+
+        .detail-visual {
+            flex: 1;
+            background: radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 70%);
+            border-radius: 20px;
+            padding: 3rem;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        /* Dashboard Preview Mockup */
+        .mockup-ui {
+            width: 100%;
+            background: #111827;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .mockup-header {
+            background: #1f2937;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .mockup-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .mockup-dot.dot-red { background: #ef4444; }
+        .mockup-dot.dot-yellow { background: #f59e0b; }
+        .mockup-dot.dot-green { background: #10b981; }
+        
+        .mockup-body {
+            padding: 1.5rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #10b981;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 3rem 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 968px) {
+            .detail-section {
+                flex-direction: column;
+                gap: 3rem;
+            }
+            h1.hero-title {
+                font-size: 2.8rem;
+            }
+        }
     </style>
 </head>
-<body class="bg-zinc-950 text-white font-sans overflow-x-hidden">
-    <div class="relative w-full min-h-screen bg-zinc-950 text-white overflow-hidden">
-      <!-- SCOPED ANIMATIONS -->
-      <style>
-        @keyframes fadeSlideIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes marquee {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
-        .animate-fade-in {
-          animation: fadeSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          opacity: 0;
-        }
-        .animate-marquee {
-          animation: marquee 30s linear infinite;
-        }
-        .delay-100 { animation-delay: 0.1s; }
-        .delay-200 { animation-delay: 0.2s; }
-        .delay-300 { animation-delay: 0.3s; }
-        .delay-400 { animation-delay: 0.4s; }
-        .delay-500 { animation-delay: 0.5s; }
-      </style>
+<body>
+    <div class="background-grid"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
 
-      <!-- Background Image with Gradient Mask -->
-      <div 
-        class="absolute inset-0 z-0 bg-[url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2832&auto=format&fit=crop')] bg-cover bg-center opacity-20"
-        style="mask-image: linear-gradient(180deg, transparent, black 15%, black 85%, transparent); -webkit-mask-image: linear-gradient(180deg, transparent, black 15%, black 85%, transparent);"
-      ></div>
-
-      <!-- Navigation Header -->
-      <header class="relative z-20 mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-          <div class="text-2xl font-bold bg-gradient-to-r from-white to-[#ffcd75] bg-clip-text text-transparent flex items-center gap-2">
-            <i data-lucide="shield" class="w-6 h-6 text-[#ffcd75]"></i> Sravan
-          </div>
-        </div>
-        <a href="/dashboard" class="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-xs font-semibold text-white backdrop-blur-md transition-all hover:bg-white/10 hover:border-white/20 hover:scale-[1.02] active:scale-[0.98]">
-          Launch Dashboard <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-        </a>
-      </header>
-
-      <div class="relative z-10 mx-auto max-w-7xl px-4 pt-16 pb-24 sm:px-6 md:pt-24 md:pb-32 lg:px-8">
-        <div class="grid grid-cols-1 gap-16 lg:grid-cols-12 lg:gap-8 items-center">
-          
-          <!-- --- LEFT COLUMN --- -->
-          <div class="lg:col-span-7 flex flex-col justify-center space-y-8">
-            
-            <!-- Badge -->
-            <div class="animate-fade-in delay-100">
-              <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 backdrop-blur-md transition-colors hover:bg-white/10">
-                <span class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-300 flex items-center gap-2">
-                  Award-Winning Design
-                  <i data-lucide="star" class="w-3.5 h-3.5 text-yellow-400 fill-yellow-400"></i>
-                </span>
-              </div>
+    <div class="container">
+        <!-- Navbar -->
+        <nav>
+            <div class="brand">
+                <i class="fas fa-microchip"></i> NEURO-QKAD
             </div>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#technology">Technology</a></li>
+                <li><a href="/dashboard">Launch Dashboard</a></li>
+            </ul>
+        </nav>
 
-            <!-- Heading -->
-            <h1 
-              class="animate-fade-in delay-200 text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-medium tracking-tighter leading-[0.9] text-white"
-            >
-              Crafting Digital<br />
-              <span class="bg-gradient-to-br from-white via-white to-[#ffcd75] bg-clip-text text-transparent">
-                Experiences
-              </span><br />
-              That Matter
-            </h1>
-
-            <!-- Description -->
-            <p class="animate-fade-in delay-300 max-w-xl text-lg text-zinc-400 leading-relaxed">
-              We design interfaces that combine beauty with functionality,
-              creating seamless experiences that users love and businesses thrive on.
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="badge">
+                <i class="fas fa-shield-halved"></i> Government Security Clearance
+            </div>
+            <h1 class="hero-title">Next-Gen Quantum-Classical Fraud Detection</h1>
+            <p class="hero-subtitle">
+                Neuro-QKAD secures transactions using quantum kernel mapping, machine learning classifiers, and Google Gemini AI reasoning.
             </p>
+            <a href="/dashboard" class="cta-btn">
+                Launch Government Dashboard <i class="fas fa-arrow-right"></i>
+            </a>
+        </section>
 
-            <!-- CTA Buttons -->
-            <div class="animate-fade-in delay-400 flex flex-col sm:flex-row gap-4">
-              <a href="/dashboard" class="group inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-sm font-semibold text-zinc-950 transition-all hover:scale-[1.02] hover:bg-zinc-200 active:scale-[0.98] shadow-lg shadow-white/5">
-                View Portfolio
-                <i data-lucide="arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-1"></i>
-              </a>
-              
-              <a href="/dashboard" class="group inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-8 py-4 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/10 hover:border-white/20">
-                <i data-lucide="play" class="w-4 h-4 fill-current"></i>
-                Watch Showreel
-              </a>
+        <!-- Features Grid -->
+        <section id="features" class="features-grid">
+            <div class="feature-card">
+                <div class="icon-wrapper">
+                    <i class="fas fa-atom"></i>
+                </div>
+                <h3 class="feature-title">Quantum SVM</h3>
+                <p class="feature-desc">Uses RY rotations & CNOT entanglements to project transactions into high-dimensional Hilbert space for anomaly separation.</p>
             </div>
-          </div>
-
-          <!-- --- RIGHT COLUMN --- -->
-          <div class="lg:col-span-5 space-y-6">
             
-            <!-- Stats Card -->
-            <div class="animate-fade-in delay-500 relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl shadow-2xl">
-              <!-- Card Glow Effect -->
-              <div class="absolute top-0 right-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-white/5 blur-3xl pointer-events-none"></div>
-
-              <div class="relative z-10">
-                <div class="flex items-center gap-4 mb-8">
-                  <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/20">
-                    <i data-lucide="target" class="h-6 w-6 text-white"></i>
-                  </div>
-                  <div>
-                    <div class="text-3xl font-bold tracking-tight text-white">150+</div>
-                    <div class="text-sm text-zinc-400">Projects Delivered</div>
-                  </div>
+            <div class="feature-card">
+                <div class="icon-wrapper">
+                    <i class="fas fa-network-wired"></i>
                 </div>
-
-                <!-- Progress Bar Section -->
-                <div class="space-y-3 mb-8">
-                  <div class="flex justify-between text-sm">
-                    <span class="text-zinc-400">Client Satisfaction</span>
-                    <span class="text-white font-medium">98%</span>
-                  </div>
-                  <div class="h-2 w-full overflow-hidden rounded-full bg-zinc-800/50">
-                    <div class="h-full w-[98%] rounded-full bg-gradient-to-r from-white to-zinc-400"></div>
-                  </div>
-                </div>
-
-                <div class="h-px w-full bg-white/10 mb-6"></div>
-
-                <!-- Mini Stats Grid -->
-                <div class="grid grid-cols-5 items-center gap-2 text-center">
-                  <div class="flex flex-col items-center justify-center transition-transform hover:-translate-y-1 cursor-default">
-                    <span class="text-xl font-bold text-white sm:text-2xl">5+</span>
-                    <span class="text-[10px] uppercase tracking-wider text-zinc-500 font-medium sm:text-xs">Years</span>
-                  </div>
-                  <div class="w-px h-8 bg-white/10 mx-auto"></div>
-                  <div class="flex flex-col items-center justify-center transition-transform hover:-translate-y-1 cursor-default">
-                    <span class="text-xl font-bold text-white sm:text-2xl">24/7</span>
-                    <span class="text-[10px] uppercase tracking-wider text-zinc-500 font-medium sm:text-xs">Support</span>
-                  </div>
-                  <div class="w-px h-8 bg-white/10 mx-auto"></div>
-                  <div class="flex flex-col items-center justify-center transition-transform hover:-translate-y-1 cursor-default">
-                    <span class="text-xl font-bold text-white sm:text-2xl">100%</span>
-                    <span class="text-[10px] uppercase tracking-wider text-zinc-500 font-medium sm:text-xs">Quality</span>
-                  </div>
-                </div>
-
-                <!-- Tag Pills -->
-                <div class="mt-8 flex flex-wrap gap-2">
-                  <div class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-medium tracking-wide text-zinc-300">
-                    <span class="relative flex h-2 w-2">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                    </span>
-                    ACTIVE
-                  </div>
-                  <div class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-medium tracking-wide text-zinc-300">
-                    <i data-lucide="crown" class="w-3.5 h-3.5 text-yellow-500"></i>
-                    PREMIUM
-                  </div>
-                </div>
-              </div>
+                <h3 class="feature-title">Classical XGBoost</h3>
+                <p class="feature-desc">Analyzes velocity and categorical metrics against standard transaction baselines with gradient boosted trees.</p>
             </div>
 
-            <!-- Marquee Card -->
-            <div class="animate-fade-in delay-500 relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 py-8 backdrop-blur-xl">
-              <h3 class="mb-6 px-8 text-sm font-medium text-zinc-400">Trusted by Industry Leaders</h3>
-              
-              <div 
-                class="relative flex overflow-hidden w-full"
-                style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent)"
-              >
-                <div class="animate-marquee flex gap-12 whitespace-nowrap px-4">
-                  <!-- Logos -->
-                  <div class="flex items-center gap-2 opacity-50 hover:opacity-100 hover:scale-105 cursor-default transition-all">
-                    <i data-lucide="hexagon" class="h-5 w-5 text-white"></i>
-                    <span class="text-base font-bold text-white tracking-tight">Acme Corp</span>
-                  </div>
-                  <div class="flex items-center gap-2 opacity-50 hover:opacity-100 hover:scale-105 cursor-default transition-all">
-                    <i data-lucide="triangle" class="h-5 w-5 text-white"></i>
-                    <span class="text-base font-bold text-white tracking-tight">Quantum</span>
-                  </div>
-                  <div class="flex items-center gap-2 opacity-50 hover:opacity-100 hover:scale-105 cursor-default transition-all">
-                    <i data-lucide="command" class="h-5 w-5 text-white"></i>
-                    <span class="text-base font-bold text-white tracking-tight">Command+Z</span>
-                  </div>
-                  <div class="flex items-center gap-2 opacity-50 hover:opacity-100 hover:scale-105 cursor-default transition-all">
-                    <i data-lucide="ghost" class="h-5 w-5 text-white"></i>
-                    <span class="text-base font-bold text-white tracking-tight">Phantom</span>
-                  </div>
-                  <div class="flex items-center gap-2 opacity-50 hover:opacity-100 hover:scale-105 cursor-default transition-all">
-                    <i data-lucide="gem" class="h-5 w-5 text-white"></i>
-                    <span class="text-base font-bold text-white tracking-tight">Ruby</span>
-                  </div>
-                  <div class="flex items-center gap-2 opacity-50 hover:opacity-100 hover:scale-105 cursor-default transition-all">
-                    <i data-lucide="cpu" class="h-5 w-5 text-white"></i>
-                    <span class="text-base font-bold text-white tracking-tight">Chipset</span>
-                  </div>
-                  <!-- Duplicate for infinite scroll -->
-                  <div class="flex items-center gap-2 opacity-50 hover:opacity-100 hover:scale-105 cursor-default transition-all">
-                    <i data-lucide="hexagon" class="h-5 w-5 text-white"></i>
-                    <span class="text-base font-bold text-white tracking-tight">Acme Corp</span>
-                  </div>
-                  <div class="flex items-center gap-2 opacity-50 hover:opacity-100 hover:scale-105 cursor-default transition-all">
-                    <i data-lucide="triangle" class="h-5 w-5 text-white"></i>
-                    <span class="text-base font-bold text-white tracking-tight">Quantum</span>
-                  </div>
-                  <div class="flex items-center gap-2 opacity-50 hover:opacity-100 hover:scale-105 cursor-default transition-all">
-                    <i data-lucide="command" class="h-5 w-5 text-white"></i>
-                    <span class="text-base font-bold text-white tracking-tight">Command+Z</span>
-                  </div>
-                  <div class="flex items-center gap-2 opacity-50 hover:opacity-100 hover:scale-105 cursor-default transition-all">
-                    <i data-lucide="ghost" class="h-5 w-5 text-white"></i>
-                    <span class="text-base font-bold text-white tracking-tight">Phantom</span>
-                  </div>
-                  <div class="flex items-center gap-2 opacity-50 hover:opacity-100 hover:scale-105 cursor-default transition-all">
-                    <i data-lucide="gem" class="h-5 w-5 text-white"></i>
-                    <span class="text-base font-bold text-white tracking-tight">Ruby</span>
-                  </div>
-                  <div class="flex items-center gap-2 opacity-50 hover:opacity-100 hover:scale-105 cursor-default transition-all">
-                    <i data-lucide="cpu" class="h-5 w-5 text-white"></i>
-                    <span class="text-base font-bold text-white tracking-tight">Chipset</span>
-                  </div>
+            <div class="feature-card">
+                <div class="icon-wrapper">
+                    <i class="fas fa-brain"></i>
                 </div>
-              </div>
+                <h3 class="feature-title">Gemini AI Reasoning</h3>
+                <p class="feature-desc">Generates human-readable security risk summaries and evaluates semantic fraud context with LLM inference.</p>
             </div>
 
-          </div>
-        </div>
-      </div>
+            <div class="feature-card">
+                <div class="icon-wrapper">
+                    <i class="fas fa-link"></i>
+                </div>
+                <h3 class="feature-title">Blockchain Ledger</h3>
+                <p class="feature-desc">Tamper-proof SQLite-backed local blockchain for government audit and cryptographic logging of alerts.</p>
+            </div>
+        </section>
+
+        <!-- Detail Section -->
+        <section id="technology" class="detail-section">
+            <div class="detail-content">
+                <h2>Four-Tier Meta-Fusion Platform</h2>
+                <p>
+                    Instead of relying on a single detection engine, Neuro-QKAD utilizes a weighted meta-fusion voting system to aggregate classical, quantum, heuristic, and semantic predictions.
+                </p>
+                <ul class="bullets">
+                    <li><i class="fas fa-check-circle"></i> Quantum-Enhanced Pattern Boundaries</li>
+                    <li><i class="fas fa-check-circle"></i> Elder Abuse and Late Night Velocity Guardrails</li>
+                    <li><i class="fas fa-check-circle"></i> Tamper-Proof Audit Logging and Consensus</li>
+                    <li><i class="fas fa-check-circle"></i> Human-in-the-Loop Explanations with Gemini Flash</li>
+                </ul>
+            </div>
+            <div class="detail-visual">
+                <div class="mockup-ui">
+                    <div class="mockup-header">
+                        <div class="mockup-dot dot-red"></div>
+                        <div class="mockup-dot dot-yellow"></div>
+                        <div class="mockup-dot dot-green"></div>
+                        <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: auto;">blockchain_consensus.log</span>
+                    </div>
+                    <div class="mockup-body">
+                        <p>> Initializing local node consensus...</p>
+                        <p style="color: #6366f1;">> Quantum State ry(x1) cnot ry(x2) ...</p>
+                        <p style="color: #a855f7;">> XGBoost score: 0.887 (HIGH RISK)</p>
+                        <p style="color: #22d3ee;">> Gemini reasoning: suspicious velocity identified...</p>
+                        <p style="color: #10b981;">> Block #47 mined successfully [0003bfa7...]</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 Neuro-QKAD. All rights reserved. Classified Government Security System.</p>
+        </footer>
     </div>
-    
-    <!-- Initialize Lucide Icons -->
-    <script>
-      lucide.createIcons();
-    </script>
 </body>
 </html>"""
 
