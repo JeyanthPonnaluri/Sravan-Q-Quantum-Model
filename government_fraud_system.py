@@ -194,86 +194,49 @@ async def home():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neuro-QKAD | Quantum-Classical Fusion Fraud Detection</title>
+    <title>Sravan | Crafting Digital Experiences That Matter</title>
+    <!-- Tailwind CSS v2 Fallback (pure CSS, never blocked by Brave Shields) -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Tailwind CSS v4 JIT compiler (jsDelivr CDN, bypasses Brave shield blocks) -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Lucide Icons (jsDelivr CDN, reliable loading) -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide/dist/umd/lucide.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root {
-            --bg-dark: #070a13;
-            --bg-card: rgba(17, 24, 39, 0.6);
-            --primary: #4f46e5;
-            --primary-light: #6366f1;
-            --secondary: #9333ea;
-            --accent: #06b6d4;
-            --text-main: #f3f4f6;
-            --text-muted: #9ca3af;
-            --border: rgba(255, 255, 255, 0.08);
-            --glow: rgba(99, 102, 241, 0.15);
-        }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            overflow-x: hidden;
-            line-height: 1.6;
-        }
-        
-        /* Grid background */
-        .background-grid {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-            background-position: center;
-            z-index: 0;
-            pointer-events: none;
-        }
-        
-        /* Glowing Orbs */
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(100px);
-            z-index: 0;
-            opacity: 0.4;
-            pointer-events: none;
-        }
-        .orb-1 {
-            width: 400px;
-            height: 400px;
-            background: var(--primary);
-            top: -100px;
-            left: -100px;
-        }
-        .orb-2 {
-            width: 500px;
-            height: 500px;
-            background: var(--secondary);
-            bottom: -200px;
-            right: -100px;
-        }
-        .orb-3 {
-            width: 300px;
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Plus Jakarta Sans', 'Outfit', 'sans-serif'],
-            }
-          }
-        }
+      /* Fallback styles in case Tailwind JIT script is blocked by Brave Shields */
+      body {
+        background-color: #09090b !important;
+        color: #ffffff !important;
+        font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif;
       }
-    </script>
+      .bg-zinc-950 { background-color: #09090b !important; }
+      .text-zinc-400 { color: #a1a1aa !important; }
+      .text-zinc-300 { color: #d4d4d8 !important; }
+      .text-zinc-500 { color: #71717a !important; }
+      .border-white\/10 { border-color: rgba(255, 255, 255, 0.1) !important; }
+      .bg-white\/5 { background-color: rgba(255, 255, 255, 0.05) !important; }
+      .backdrop-blur-md { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+      .backdrop-blur-xl { backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
+      /* Ensure links look like buttons if Tailwind JIT isn't running */
+      a.group, button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem 2rem;
+        border-radius: 9999px;
+        font-weight: 600;
+        text-decoration: none !important;
+        transition: all 0.2s ease;
+      }
+      a.bg-white {
+        background-color: #ffffff !important;
+        color: #09090b !important;
+      }
+      a.border-white\/10 {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #ffffff !important;
+      }
+    </style>
 </head>
 <body class="bg-zinc-950 text-white font-sans overflow-x-hidden">
     <div class="relative w-full min-h-screen bg-zinc-950 text-white overflow-hidden">
