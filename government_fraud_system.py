@@ -2279,6 +2279,28 @@ async def dashboard():
                 }
             }
 
+            // Webhook Configuration Sync
+            document.getElementById('webhookUrlInput').addEventListener('change', saveWebhookUrl);
+            document.getElementById('webhookUrlInput').addEventListener('blur', saveWebhookUrl);
+
+            async function saveWebhookUrl() {
+                const url = document.getElementById('webhookUrlInput').value;
+                try {
+                    await fetch('/api/v1/configure_webhook', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ url: url })
+                    });
+                } catch (error) {
+                    console.error('Error saving webhook URL:', error);
+                }
+            }
+
+            // Initialize webhook url configuration
+            saveWebhookUrl();
+
             // Load initial data
             loadBlockchainStats();
             loadRecentTransactions();
@@ -2295,6 +2317,86 @@ async def dashboard():
     </body>
     </html>
     """
+
+configured_webhook_url = "https://merchant.requestcatcher.com/test"
+
+def dispatch_webhook_sync(url: str, transaction_data: dict, response_data: dict):
+    """Sync helper to post webhooks, runs in background thread/task"""
+    import urllib.request
+    import urllib.error
+    
+    is_discord = "discord.com" in url
+    is_slack = "hooks.slack.com" in url
+    
+    amount_str = f"₹{transaction_data.get('amount', 0):,.2f}"
+    risk_level = response_data.get("risk_level", "UNKNOWN")
+    action = response_data.get("action", "APPROVE")
+    score = response_data.get("risk_score", 0.0)
+    tx_hash = response_data.get("transaction_hash", "0")
+    flags = ", ".join(response_data.get("flags", [])) or "None"
+    
+    # Simple color picker: Red for BLOCK, Yellow for CHALLENGE_MFA, Green for APPROVE
+    color = 65280  # Green
+    if action == "BLOCK":
+        color = 14429184  # Red
+    elif action == "CHALLENGE_MFA":
+        color = 16753920  # Yellow
+        
+    if is_discord:
+        payload = {
+            "username": "Neuro-QKAD Gateway",
+            "avatar_url": "https://img.icons8.com/color/96/shield.png",
+            "embeds": [
+                {
+                    "title": f"🛡️ Transaction Verified: {action}",
+                    "color": color,
+                    "description": f"The hybrid meta-fusion security gateway has audited checkout transaction **{tx_hash[:16]}...**",
+                    "fields": [
+                        {"name": "Transaction Hash", "value": f"`{tx_hash}`", "inline": false},
+                        {"name": "Checkout Amount", "value": f"**{amount_str}**", "inline": true},
+                        {"name": "Risk Level Assessment", "value": f"**{risk_level} ({score}%)**", "inline": true},
+                        {"name": "Gateway Action", "value": f"**`{action}`**", "inline": true},
+                        {"name": "Security Indicators", "value": f"*{flags}*", "inline": false}
+                    ],
+                    "footer": {
+                        "text": "Neuro-QKAD Real-time API Protection Node"
+                    },
+                    "timestamp": datetime.now().isoformat()
+                }
+            ]
+        }
+    elif is_slack:
+        payload = {
+            "text": f"🛡️ *Neuro-QKAD Gateway Alert: {action}*\n*Hash*: `{tx_hash}`\n*Amount*: {amount_str}\n*Risk*: {risk_level} ({score}%)\n*Flags*: {flags}"
+        }
+    else:
+        # Standard generic webhook post
+        payload = {
+            "event": "transaction.checked",
+            "timestamp": int(time.time()),
+            "transaction": transaction_data,
+            "response": response_data
+        }
+        
+    try:
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode('utf-8'),
+            headers={'Content-Type': 'application/json', 'User-Agent': 'Neuro-QKAD-Webhook-Dispatcher/1.0'},
+            method='POST'
+        )
+        with urllib.request.urlopen(req, timeout=4.0) as resp:
+            return resp.getcode()
+    except Exception as e:
+        print(f"Error dispatching webhook: {e}")
+        return None
+
+@app.post("/api/v1/configure_webhook")
+async def configure_webhook(payload: dict):
+    global configured_webhook_url
+    url = payload.get("url", "")
+    configured_webhook_url = url
+    return {"status": "success", "configured_url": url}
 
 webhook_deliveries = []
 
@@ -2339,6 +2441,9 @@ async def api_verify_transaction(transaction: TransactionFull):
     webhook_deliveries.append(delivery)
     if len(webhook_deliveries) > 30:
         webhook_deliveries.pop(0)
+        
+    if configured_webhook_url:
+        asyncio.create_task(asyncio.to_thread(dispatch_webhook_sync, configured_webhook_url, transaction.model_dump(), response_data))
         
     return response_data
 
