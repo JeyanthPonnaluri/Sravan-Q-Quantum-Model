@@ -2388,7 +2388,7 @@ async def dashboard():
                     .then(logs => {
                         const log = logs.find(l => l.id === id);
                         if (log) {
-                            alert('Webhook Payload Detail:\n\n' + JSON.stringify(log, null, 4));
+                            alert('Webhook Payload Detail:\\n\\n' + JSON.stringify(log, null, 4));
                         }
                     });
             }
