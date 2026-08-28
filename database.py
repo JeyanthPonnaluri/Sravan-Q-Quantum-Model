@@ -116,10 +116,24 @@ class Database:
         transaction_hashes = [tx.get('transaction_hash', '') for tx in transactions]
         merkle_root = self.calculate_merkle_root(transaction_hashes)
         
+        # Simple RSA modular exponentiation signatures for 3 virtual nodes
+        nodes = {
+            "node_primary": {"d": 79, "n": 3233},
+            "node_validator_1": {"d": 101, "n": 2773},
+            "node_validator_2": {"d": 125, "n": 2419}
+        }
+        consensus_signatures = {}
+        for node_id, keys in nodes.items():
+            # Convert previous block hash to integer modulo n
+            val = sum(ord(c) for c in previous_hash) % keys["n"]
+            sig = pow(val, keys["d"], keys["n"])
+            consensus_signatures[node_id] = f"{node_id}_sig_{sig}"
+
         # Prepare block data
         block_data = {
             "transactions": transactions,
-            "mined_at": datetime.now().isoformat()
+            "mined_at": datetime.now().isoformat(),
+            "consensus_signatures": consensus_signatures
         }
         
         # Mining (proof of work)
@@ -248,18 +262,28 @@ class Database:
         confirmed_transactions = cursor.fetchone()[0]
         
         cursor.execute("""
-            SELECT block_hash, timestamp, transactions_count 
+            SELECT id, block_hash, previous_hash, merkle_root, timestamp, nonce, difficulty, transactions_count, block_data
             FROM blockchain_blocks 
-            ORDER BY id DESC 
-            LIMIT 5
+            ORDER BY id ASC
         """)
         
-        recent_blocks = []
+        chain = []
         for row in cursor.fetchall():
-            recent_blocks.append({
-                "hash": row[0][:16] + "...",
-                "timestamp": row[1],
-                "transactions": row[2]
+            block_data_parsed = {}
+            try:
+                block_data_parsed = json.loads(row[8])
+            except Exception:
+                pass
+            chain.append({
+                "index": row[0],
+                "hash": row[1],
+                "previous_hash": row[2],
+                "merkle_root": row[3],
+                "timestamp": row[4],
+                "nonce": row[5],
+                "difficulty": row[6],
+                "transactions_count": row[7],
+                "consensus_signatures": block_data_parsed.get("consensus_signatures", {})
             })
         
         conn.close()
@@ -269,7 +293,7 @@ class Database:
             "total_transactions": total_transactions,
             "confirmed_transactions": confirmed_transactions,
             "pending_transactions": total_transactions - confirmed_transactions,
-            "recent_blocks": recent_blocks
+            "chain": chain
         }
     
     def get_pending_transactions(self) -> List[Dict]:
