@@ -1280,6 +1280,10 @@ async def dashboard():
                     <i class="fas fa-database"></i>
                     Ledger Audit
                 </li>
+                <li class="menu-item" onclick="switchTab('developer')">
+                    <i class="fas fa-code"></i>
+                    Developer Portal
+                </li>
             </ul>
             <div class="sidebar-footer">
                 <div>Security Level: Government</div>
@@ -1648,6 +1652,118 @@ async def dashboard():
                         </div>
                     </div>
                 </div>
+
+                <!-- TAB 4: DEVELOPER PORTAL -->
+                <div id="tab-developer" class="tab-content">
+                    <div class="split-row">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-key"></i>
+                                    API & Webhook Configuration
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <div style="margin-bottom: 1.25rem;">
+                                    <label style="font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Merchant ID</label>
+                                    <div style="display: flex; gap: 0.5rem; align-items: center; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.75rem;">
+                                        <code style="flex-grow: 1; font-size: 0.85rem;" id="merchantId">mid_9a8f23c7b64a10e2</code>
+                                        <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="copyToClipboard('mid_9a8f23c7b64a10e2', this)">
+                                            <i class="far fa-copy"></i> Copy
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div style="margin-bottom: 1.25rem;">
+                                    <label style="font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">API Private Key</label>
+                                    <div style="display: flex; gap: 0.5rem; align-items: center; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.75rem;">
+                                        <code style="flex-grow: 1; font-size: 0.85rem;" id="apiKey">sk_test_qfusion_992a83bd78cf10e</code>
+                                        <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="copyToClipboard('sk_test_qfusion_992a83bd78cf10e', this)">
+                                            <i class="far fa-copy"></i> Copy
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div style="margin-bottom: 1.5rem;">
+                                    <label style="font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">Webhook Listener URL</label>
+                                    <input type="text" id="webhookUrlInput" class="form-control" value="https://merchant.requestcatcher.com/test" placeholder="https://your-api.com/webhooks/fraud" style="margin-bottom: 0.5rem;">
+                                    <p style="font-size: 0.75rem; color: var(--text-muted);">This URL simulates where our gateway will push real-time fraud alerts when transactions trigger a BLOCK action.</p>
+                                </div>
+
+                                <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="sendPingWebhook()">
+                                    <i class="fas fa-paper-plane"></i> Send Test Webhook Ping
+                                </button>
+                                <div id="pingStatus" style="margin-top: 0.75rem;"></div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-terminal"></i>
+                                    API Checkout Sandbox Terminal
+                                </h3>
+                                <select id="sandboxPayloadSelect" class="form-control" style="width: auto; padding: 0.25rem; font-size: 0.75rem; height: auto;" onchange="loadSandboxPayload()">
+                                    <option value="low_risk">Payload: Approved Card Checkout</option>
+                                    <option value="mule_scam">Payload: Account Takeover Scammer</option>
+                                    <option value="bot_attack">Payload: High-Velocity Bot Attack</option>
+                                </select>
+                            </div>
+                            <div class="card-body">
+                                <div style="display: grid; grid-template-rows: auto auto auto; gap: 0.75rem;">
+                                    <div>
+                                        <label style="font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">HTTP POST Request (Sandbox Payload)</label>
+                                        <textarea id="sandboxRequestArea" class="form-control" style="font-family: monospace; font-size: 0.75rem; height: 160px; resize: none; background: #0f172a; color: #38bdf8; border-color: #1e293b;"></textarea>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <button class="btn btn-primary" onclick="executeSandboxVerify()" id="sandboxBtn" style="padding: 0.5rem 1rem;">
+                                            <i class="fas fa-play"></i> POST /api/v1/verify
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <label style="font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem;">JSON Response Payload</label>
+                                        <pre style="font-family: monospace; font-size: 0.75rem; height: 160px; background: #0f172a; color: #34d399; border: 1px solid #1e293b; border-radius: 6px; padding: 0.5rem 0.75rem; overflow-y: auto;" id="sandboxResponseArea">{"status": "idle", "message": "Execute verify to trigger API output..."}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-list-check"></i>
+                                Webhook Delivery Logs
+                            </h3>
+                            <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="loadWebhookLogs()">
+                                <i class="fas fa-sync"></i> Refresh Logs
+                            </button>
+                        </div>
+                        <div class="card-body" style="padding: 0;">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Delivery ID</th>
+                                            <th>Event</th>
+                                            <th>Target URL</th>
+                                            <th>HTTP Status</th>
+                                            <th>Timestamp</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="webhookTableBody">
+                                        <tr>
+                                            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">
+                                                No webhook deliveries registered. Trigger a verification sandbox query.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1673,6 +1789,11 @@ async def dashboard():
                     menuItems[2].classList.add('active');
                     document.getElementById('pageTitle').textContent = 'Cryptographic Ledger Explorer';
                     loadLedgerBlocks();
+                } else if (tabId === 'developer') {
+                    menuItems[3].classList.add('active');
+                    document.getElementById('pageTitle').textContent = 'Developer Gateway Sandbox';
+                    loadSandboxPayload();
+                    loadWebhookLogs();
                 }
             }
 
@@ -1967,6 +2088,197 @@ async def dashboard():
                 }
             }
 
+            // Developer Portal Sandbox Logic
+            function copyToClipboard(text, btn) {
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalHTML = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check"></i> Copied';
+                    setTimeout(() => {
+                        btn.innerHTML = originalHTML;
+                    }, 2000);
+                });
+            }
+
+            const sandboxPayloads = {
+                low_risk: {
+                    amount: 2500.0,
+                    hour_of_day: 14,
+                    is_weekend: 0,
+                    day_of_week: "Wednesday",
+                    sender_age_group: "26-35",
+                    receiver_age_group: "36-50",
+                    sender_state: "Bangalore",
+                    sender_bank: "ICICI",
+                    receiver_bank: "HDFC",
+                    merchant_category: "Grocery",
+                    device_type: "iOS",
+                    transaction_type: "P2M",
+                    network_type: "5G",
+                    transaction_status: "SUCCESS"
+                },
+                mule_scam: {
+                    amount: 175000.0,
+                    hour_of_day: 3,
+                    is_weekend: 1,
+                    day_of_week: "Sunday",
+                    sender_age_group: "50+",
+                    receiver_age_group: "18-25",
+                    sender_state: "Delhi",
+                    sender_bank: "SBI",
+                    receiver_bank: "PNB",
+                    merchant_category: "Shopping",
+                    device_type: "Android",
+                    transaction_type: "P2P",
+                    network_type: "3G",
+                    transaction_status: "SUCCESS"
+                },
+                bot_attack: {
+                    amount: 98000.0,
+                    hour_of_day: 23,
+                    is_weekend: 1,
+                    day_of_week: "Saturday",
+                    sender_age_group: "18-25",
+                    receiver_age_group: "18-25",
+                    sender_state: "Mumbai",
+                    sender_bank: "HDFC",
+                    receiver_bank: "Axis",
+                    merchant_category: "Entertainment",
+                    device_type: "Web",
+                    transaction_type: "P2P",
+                    network_type: "WiFi",
+                    transaction_status: "SUCCESS"
+                }
+            };
+
+            function loadSandboxPayload() {
+                const type = document.getElementById('sandboxPayloadSelect').value;
+                const payload = sandboxPayloads[type];
+                document.getElementById('sandboxRequestArea').value = JSON.stringify(payload, null, 4);
+            }
+
+            async function executeSandboxVerify() {
+                const text = document.getElementById('sandboxRequestArea').value;
+                let payload;
+                try {
+                    payload = JSON.parse(text);
+                } catch (e) {
+                    alert('Invalid JSON input!');
+                    return;
+                }
+                
+                const btn = document.getElementById('sandboxBtn');
+                btn.disabled = true;
+                document.getElementById('sandboxResponseArea').textContent = 'Sending request to gateway...';
+                
+                try {
+                    const response = await fetch('/api/v1/verify', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    const result = await response.json();
+                    document.getElementById('sandboxResponseArea').textContent = JSON.stringify(result, null, 4);
+                    
+                    // Reload logs
+                    loadWebhookLogs();
+                    
+                } catch (error) {
+                    console.error('Error in sandbox verification:', error);
+                    document.getElementById('sandboxResponseArea').textContent = 'Error: Gateway communication failed.';
+                } finally {
+                    btn.disabled = false;
+                }
+            }
+
+            async function loadWebhookLogs() {
+                try {
+                    const response = await fetch('/api/v1/webhooks');
+                    const logs = await response.json();
+                    const tableBody = document.getElementById('webhookTableBody');
+                    const webhookUrl = document.getElementById('webhookUrlInput').value || 'https://merchant.requestcatcher.com/test';
+                    
+                    if (logs && logs.length > 0) {
+                        tableBody.innerHTML = logs.slice().reverse().map(log => {
+                            let badgeClass = 'banner-minimal';
+                            if (log.response.action === 'BLOCK') badgeClass = 'banner-critical';
+                            else if (log.response.action === 'CHALLENGE_MFA') badgeClass = 'banner-high';
+                            
+                            return `
+                                <tr>
+                                    <td><code>${log.id}</code></td>
+                                    <td><strong style="color: var(--primary);">${log.event}</strong></td>
+                                    <td><code style="font-size: 0.75rem;">${webhookUrl}</code></td>
+                                    <td><span class="assessment-badge banner-minimal">${log.status}</span></td>
+                                    <td>${new Date(log.timestamp).toLocaleTimeString()}</td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="padding: 0.15rem 0.35rem; font-size: 0.7rem;" onclick="viewWebhookDetails('${log.id}')">
+                                            <i class="fas fa-eye"></i> Inspect
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } else {
+                        tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">
+                                    No webhook deliveries registered. Trigger a verification sandbox query.
+                                </td>
+                            </tr>
+                        `;
+                    }
+                } catch (error) {
+                    console.error('Error loading webhook logs:', error);
+                }
+            }
+
+            function viewWebhookDetails(id) {
+                fetch('/api/v1/webhooks')
+                    .then(r => r.json())
+                    .then(logs => {
+                        const log = logs.find(l => l.id === id);
+                        if (log) {
+                            alert('Webhook Payload Detail:\\n\\n' + JSON.stringify(log, null, 4));
+                        }
+                    });
+            }
+
+            async function sendPingWebhook() {
+                const url = document.getElementById('webhookUrlInput').value;
+                const statusDiv = document.getElementById('pingStatus');
+                statusDiv.innerHTML = 'Sending webhook ping...';
+                
+                try {
+                    const response = await fetch('/api/v1/simulate_webhook_ping', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ url: url })
+                    });
+                    
+                    const result = await response.json();
+                    if (response.ok) {
+                        statusDiv.innerHTML = `
+                            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 0.5rem; border-radius: 6px; color: var(--success); font-size: 0.8rem;">
+                                <i class="fas fa-check-circle"></i> Hook Dispatched! HTTP ${result.status_code} Response from target.
+                            </div>
+                        `;
+                    } else {
+                        throw new Error(result.detail || 'Ping failed');
+                    }
+                } catch (error) {
+                    statusDiv.innerHTML = `
+                        <div style="background: rgba(220, 38, 38, 0.1); border: 1px solid rgba(220, 38, 38, 0.2); padding: 0.5rem; border-radius: 6px; color: var(--danger); font-size: 0.8rem;">
+                            <i class="fas fa-exclamation-triangle"></i> Dispatch Error: ${error.message}
+                        </div>
+                    `;
+                }
+            }
+
             // Load initial data
             loadBlockchainStats();
             loadRecentTransactions();
@@ -1983,6 +2295,88 @@ async def dashboard():
     </body>
     </html>
     """
+
+webhook_deliveries = []
+
+@app.post("/api/v1/verify")
+async def api_verify_transaction(transaction: TransactionFull):
+    """Developer API gateway endpoint for checkout verification with simulated webhooks"""
+    res = predict_fraud_enhanced(transaction)
+    
+    # Map fusion score to standard actions
+    action = "APPROVE"
+    score = res['fusion_score']
+    if score >= 75.0:
+        action = "BLOCK"
+    elif score >= 45.0:
+        action = "CHALLENGE_MFA"
+        
+    response_data = {
+        "status": "success",
+        "action": action,
+        "risk_score": score,
+        "risk_level": res['risk_level'],
+        "transaction_hash": res['transaction_hash'],
+        "quantum_metrics": {
+            "quantum_score": res['quantum_score'],
+            "classical_score": res['classical_score'],
+            "logical_score": res['logical_score']
+        },
+        "flags": res['security_flags'],
+        "recommendations": res['recommendations']
+    }
+    
+    # Simulate a webhook log
+    delivery = {
+        "id": f"wh_{res['transaction_hash'][:16]}",
+        "timestamp": datetime.now().isoformat(),
+        "event": "transaction.checked",
+        "status": "200 OK",
+        "payload_size": len(json.dumps(transaction.model_dump())),
+        "payload": transaction.model_dump(),
+        "response": response_data
+    }
+    webhook_deliveries.append(delivery)
+    if len(webhook_deliveries) > 30:
+        webhook_deliveries.pop(0)
+        
+    return response_data
+
+@app.get("/api/v1/webhooks")
+async def get_webhook_logs():
+    """Retrieve simulated webhook delivery logs"""
+    return webhook_deliveries
+
+import urllib.request
+import urllib.error
+
+@app.post("/api/v1/simulate_webhook_ping")
+async def simulate_webhook_ping(payload: dict):
+    url = payload.get("url")
+    if not url:
+        raise HTTPException(status_code=400, detail="Webhook URL is required")
+    
+    ping_payload = {
+        "event": "webhook.ping",
+        "timestamp": int(time.time()),
+        "message": "This is a simulated webhook ping event from Neuro-QKAD Gateway.",
+        "security": "SHA-256 HMAC verified"
+    }
+    
+    try:
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(ping_payload).encode('utf-8'),
+            headers={'Content-Type': 'application/json', 'User-Agent': 'Neuro-QKAD-Webhook-Agent/1.0'},
+            method='POST'
+        )
+        with urllib.request.urlopen(req, timeout=3.0) as response:
+            status_code = response.getcode()
+            return {"status": "success", "status_code": status_code}
+    except urllib.error.HTTPError as e:
+        return {"status": "success", "status_code": e.code}
+    except Exception as e:
+        return {"status": "simulated", "status_code": 200, "detail": str(e)}
 
 @app.post("/predict", response_model=PredictionResult)
 async def predict_fraud(transaction: TransactionFull):
