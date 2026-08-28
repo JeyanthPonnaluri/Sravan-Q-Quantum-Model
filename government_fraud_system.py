@@ -687,743 +687,995 @@ async def dashboard():
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
         <style>
             :root {
-                --primary-blue: #0f172a;       /* Slate 900 */
-                --secondary-blue: #1e293b;     /* Slate 800 */
-                --accent-gold: #f1f5f9;        /* Slate 100 */
-                --text-dark: #0f172a;          /* Slate 900 */
-                --text-light: #64748b;         /* Slate 500 */
-                --bg-light: #f8fafc;           /* Slate 50 */
-                --bg-white: #ffffff;
-                --border-light: #e2e8f0;       /* Slate 200 */
-                --success-green: #059669;      /* Emerald 600 */
-                --warning-orange: #d97706;     /* Amber 600 */
-                --danger-red: #dc2626;         /* Red 600 */
-                --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-                --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+                --sidebar-bg: #0b0f19;
+                --sidebar-hover: #1e293b;
+                --sidebar-active: #6366f1;
+                --sidebar-text: #94a3b8;
+                --sidebar-text-active: #ffffff;
+                --primary: #6366f1;
+                --primary-dark: #4f46e5;
+                --bg-main: #f8fafc;
+                --card-bg: #ffffff;
+                --text-main: #0f172a;
+                --text-muted: #64748b;
+                --border-color: #e2e8f0;
+                --success: #059669;
+                --warning: #d97706;
+                --danger: #dc2626;
+                --info: #06b6d4;
+                --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+                --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
             }
 
             * {
+                box-sizing: border-box;
                 margin: 0;
                 padding: 0;
-                box-sizing: border-box;
             }
 
             body {
                 font-family: 'Inter', sans-serif;
-                background: var(--bg-light);
-                color: var(--text-dark);
-                line-height: 1.6;
-            }
-
-            .header {
-                background: #0f172a;
-                color: white;
-                padding: 1.25rem 0;
-                border-bottom: 1px solid #1e293b;
-                position: relative;
-            }
-
-            .header-content {
-                max-width: 1400px;
-                margin: 0 auto;
-                padding: 0 2rem;
+                background: var(--bg-main);
+                color: var(--text-main);
+                height: 100vh;
                 display: flex;
-                align-items: center;
-                justify-content: space-between;
-            }
-
-            .logo-section {
-                display: flex;
-                align-items: center;
-                gap: 0.875rem;
-            }
-
-            .govt-emblem {
-                width: 44px;
-                height: 44px;
-                background: #1e293b;
-                border: 1px solid #334155;
-                border-radius: 8px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.25rem;
-                color: #f8fafc;
-            }
-
-            .header-title {
-                display: flex;
-                flex-direction: column;
-            }
-
-            .header-title h1 {
-                font-size: 1.35rem;
-                font-weight: 600;
-                margin-bottom: 0.125rem;
-                letter-spacing: -0.025em;
-            }
-
-            .header-subtitle {
-                font-size: 0.825rem;
-                color: #94a3b8;
-                font-weight: 400;
-            }
-
-            .security-badge {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                background: #1e293b;
-                border: 1px solid #334155;
-                padding: 0.375rem 0.875rem;
-                border-radius: 6px;
-                font-size: 0.8rem;
-                font-weight: 500;
-                color: #e2e8f0;
-            }
-
-            .main-container {
-                max-width: 1400px;
-                margin: 2rem auto;
-                padding: 0 2rem;
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 2rem;
-            }
-
-            .panel {
-                background: var(--bg-white);
-                border-radius: 8px;
-                box-shadow: var(--shadow-sm);
-                border: 1px solid var(--border-light);
                 overflow: hidden;
             }
 
-            .panel-header {
-                background: #f8fafc;
-                color: var(--text-dark);
-                padding: 1rem 1.25rem;
+            /* Sidebar Layout */
+            .sidebar {
+                width: 260px;
+                background: var(--sidebar-bg);
+                color: var(--sidebar-text);
+                display: flex;
+                flex-direction: column;
+                border-right: 1px solid #1e293b;
+                flex-shrink: 0;
+            }
+
+            .sidebar-brand {
+                padding: 1.5rem 1.25rem;
+                border-bottom: 1px solid #1e293b;
                 display: flex;
                 align-items: center;
                 gap: 0.75rem;
-                border-bottom: 1px solid var(--border-light);
+                color: #ffffff;
             }
 
-            .panel-header i {
-                color: #6366f1;
+            .sidebar-brand i {
+                color: var(--sidebar-active);
+                font-size: 1.25rem;
             }
 
-            .panel-header h2 {
-                font-size: 1.05rem;
+            .sidebar-brand span {
+                font-weight: 700;
+                letter-spacing: -0.025em;
+                font-size: 1.1rem;
+            }
+
+            .sidebar-menu {
+                list-style: none;
+                padding: 1rem 0.75rem;
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+                flex-grow: 1;
+            }
+
+            .menu-item {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 0.75rem 1rem;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: 500;
+                font-size: 0.9rem;
+                transition: all 0.2s ease;
+            }
+
+            .menu-item:hover {
+                background: var(--sidebar-hover);
+                color: var(--sidebar-text-active);
+            }
+
+            .menu-item.active {
+                background: var(--sidebar-active);
+                color: var(--sidebar-text-active);
+            }
+
+            .sidebar-footer {
+                padding: 1rem 1.25rem;
+                border-top: 1px solid #1e293b;
+                font-size: 0.75rem;
+                color: #475569;
+            }
+
+            /* Main Workspace Layout */
+            .workspace {
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            /* Top Bar */
+            .top-bar {
+                height: 64px;
+                background: #ffffff;
+                border-bottom: 1px solid var(--border-color);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 2rem;
+                flex-shrink: 0;
+            }
+
+            .top-bar-title {
                 font-weight: 600;
-                letter-spacing: -0.01em;
+                font-size: 1.1rem;
+                letter-spacing: -0.015em;
             }
 
-            .panel-content {
-                padding: 1.5rem;
+            .top-bar-actions {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
             }
 
-            .form-section {
+            .badge {
+                display: flex;
+                align-items: center;
+                gap: 0.375rem;
+                padding: 0.375rem 0.75rem;
+                border-radius: 6px;
+                font-size: 0.75rem;
+                font-weight: 600;
+            }
+
+            .badge-neutral {
+                background: #f1f5f9;
+                border: 1px solid #cbd5e1;
+                color: #475569;
+            }
+
+            .badge-active {
+                background: rgba(16, 185, 129, 0.1);
+                border: 1px solid rgba(16, 185, 129, 0.3);
+                color: #059669;
+            }
+
+            .badge-warning {
+                background: rgba(245, 158, 11, 0.1);
+                border: 1px solid rgba(245, 158, 11, 0.3);
+                color: #d97706;
+            }
+
+            /* Content Area */
+            .content-area {
+                flex-grow: 1;
+                padding: 2rem;
+                overflow-y: auto;
+                background: #f8fafc;
+            }
+
+            .tab-content {
+                display: none;
+            }
+
+            .tab-content.active {
+                display: block;
+                animation: fadeIn 0.25s ease;
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(4px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            /* Grid Layouts */
+            .kpi-row {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 1.5rem;
                 margin-bottom: 1.5rem;
             }
 
-            .section-title {
-                font-size: 1rem;
-                font-weight: 600;
-                color: var(--text-dark);
-                margin-bottom: 1rem;
-                padding-bottom: 0.5rem;
-                border-bottom: 2px solid var(--border-light);
+            .kpi-card {
+                background: var(--card-bg);
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                padding: 1.25rem;
                 display: flex;
-                align-items: center;
+                flex-direction: column;
                 gap: 0.5rem;
+                box-shadow: var(--shadow-sm);
             }
 
-            .form-grid {
+            .kpi-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                color: var(--text-muted);
+                font-size: 0.8rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+
+            .kpi-header i {
+                font-size: 1rem;
+                color: var(--primary);
+            }
+
+            .kpi-val {
+                font-size: 1.75rem;
+                font-weight: 700;
+                letter-spacing: -0.025em;
+            }
+
+            .split-row {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 1rem;
+                gap: 1.5rem;
             }
 
-            .form-group {
-                margin-bottom: 1rem;
+            /* Cards and Panels */
+            .card {
+                background: var(--card-bg);
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                box-shadow: var(--shadow-sm);
+                overflow: hidden;
+                margin-bottom: 1.5rem;
             }
 
-            .form-group.full-width {
-                grid-column: 1 / -1;
+            .card-header {
+                padding: 1rem 1.25rem;
+                border-bottom: 1px solid var(--border-color);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: #f8fafc;
             }
 
-            label {
+            .card-title {
+                font-size: 0.95rem;
+                font-weight: 600;
+                letter-spacing: -0.01em;
                 display: flex;
                 align-items: center;
                 gap: 0.5rem;
+            }
+
+            .card-title i {
+                color: var(--primary);
+            }
+
+            .card-body {
+                padding: 1.25rem;
+            }
+
+            /* Sliders and Risk Controller styling */
+            .slider-group {
+                margin-bottom: 1.25rem;
+            }
+
+            .slider-header {
+                display: flex;
+                justify-content: space-between;
+                font-size: 0.85rem;
                 font-weight: 500;
-                color: var(--text-dark);
                 margin-bottom: 0.5rem;
+            }
+
+            .slider-val {
+                font-weight: 600;
+            }
+
+            .slider-input {
+                width: 100%;
+                -webkit-appearance: none;
+                height: 6px;
+                border-radius: 3px;
+                background: #e2e8f0;
+                outline: none;
+            }
+
+            .slider-input::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background: var(--primary);
+                cursor: pointer;
+                transition: transform 0.1s ease;
+            }
+
+            .slider-input::-webkit-slider-thumb:hover {
+                transform: scale(1.2);
+            }
+
+            /* Tables and Lists */
+            .table-container {
+                overflow-x: auto;
+            }
+
+            .data-table {
+                width: 100%;
+                border-collapse: collapse;
+                text-align: left;
                 font-size: 0.85rem;
             }
 
-            .label-icon {
-                color: #64748b; /* Slate 500 */
-                font-size: 0.9rem;
-                width: 16px;
-                text-align: center;
-            }
-
-            input, select {
-                width: 100%;
-                padding: 0.625rem;
-                border: 1px solid var(--border-light);
-                border-radius: 6px;
-                font-size: 0.9rem;
-                transition: all 0.2s ease;
-                background: var(--bg-white);
-                color: var(--text-dark);
-            }
-
-            input:focus, select:focus {
-                outline: none;
-                border-color: #6366f1;
-                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-            }
-
-            .submit-btn {
-                width: 100%;
-                background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
-                color: white;
-                padding: 0.875rem 1.5rem;
-                border: none;
-                border-radius: 8px;
-                font-size: 1rem;
+            .data-table th {
+                padding: 0.75rem 1rem;
+                background: #f8fafc;
+                border-bottom: 1px solid var(--border-color);
                 font-weight: 600;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                margin-top: 1rem;
+                color: var(--text-muted);
             }
 
-            .submit-btn:hover {
-                transform: translateY(-1px);
-                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            .data-table td {
+                padding: 0.75rem 1rem;
+                border-bottom: 1px solid var(--border-color);
+                vertical-align: middle;
             }
 
-            .submit-btn:disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
-                transform: none;
+            .data-table tr:hover {
+                background: #f8fafc;
             }
 
-            .loading {
-                display: none;
-                text-align: center;
-                padding: 2rem;
+            /* Simulation form elements */
+            .form-section-title {
+                font-size: 0.8rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: var(--text-muted);
+                font-weight: 600;
+                margin-bottom: 1rem;
+                padding-bottom: 0.25rem;
+                border-bottom: 1px solid var(--border-color);
             }
 
-            .spinner {
-                border: 3px solid var(--border-light);
-                border-top: 3px solid var(--secondary-blue);
-                border-radius: 50%;
-                width: 40px;
-                height: 40px;
-                animation: spin 1s linear infinite;
-                margin: 0 auto 1rem;
-            }
-
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-
-            .results {
-                display: none;
-                margin-top: 1.5rem;
-            }
-
-            .risk-header {
-                text-align: center;
-                padding: 1.5rem;
-                border-radius: 8px;
-                margin-bottom: 1.5rem;
-            }
-
-            .risk-critical { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); color: #991b1b; }
-            .risk-high { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #92400e; }
-            .risk-medium { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1e40af; }
-            .risk-low { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #065f46; }
-            .risk-minimal { background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); color: #064e3b; }
-
-            .score-grid {
+            .simulator-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                grid-template-columns: 1fr 1fr;
                 gap: 1rem;
                 margin-bottom: 1.5rem;
             }
 
-            .score-card {
-                background: var(--bg-white);
-                border: 1px solid var(--border-light);
+            .form-item {
+                display: flex;
+                flex-direction: column;
+                gap: 0.375rem;
+            }
+
+            .form-item label {
+                font-size: 0.8rem;
+                font-weight: 500;
+                color: var(--text-muted);
+                display: flex;
+                align-items: center;
+                gap: 0.375rem;
+            }
+
+            .form-item label i {
+                color: #94a3b8;
+            }
+
+            .form-control {
+                padding: 0.5rem 0.75rem;
+                border: 1px solid var(--border-color);
+                border-radius: 6px;
+                font-size: 0.85rem;
+                outline: none;
+                background: #ffffff;
+                transition: border-color 0.15s ease;
+            }
+
+            .form-control:focus {
+                border-color: var(--primary);
+                box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+            }
+
+            .btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                padding: 0.625rem 1.25rem;
+                border-radius: 6px;
+                font-size: 0.875rem;
+                font-weight: 600;
+                cursor: pointer;
+                border: none;
+                transition: all 0.15s ease;
+            }
+
+            .btn-primary {
+                background: var(--primary);
+                color: #ffffff;
+            }
+
+            .btn-primary:hover {
+                background: var(--primary-dark);
+            }
+
+            .btn-primary:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+
+            .btn-secondary {
+                background: #f1f5f9;
+                color: var(--text-main);
+                border: 1px solid var(--border-color);
+            }
+
+            .btn-secondary:hover {
+                background: #e2e8f0;
+            }
+
+            /* Score gauges and gauges styling */
+            .score-breakdown-grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .score-gauge-card {
+                border: 1px solid var(--border-color);
                 border-radius: 8px;
                 padding: 1rem;
                 text-align: center;
-                transition: transform 0.3s ease;
+                background: #f8fafc;
             }
 
-            .score-card:hover {
-                transform: translateY(-2px);
-                box-shadow: var(--shadow-lg);
-            }
-
-            .score-value {
+            .score-gauge-val {
                 font-size: 1.5rem;
                 font-weight: 700;
                 margin-bottom: 0.25rem;
             }
 
-            .score-label {
-                font-size: 0.8rem;
-                color: var(--text-light);
+            .score-gauge-lbl {
+                font-size: 0.75rem;
+                color: var(--text-muted);
                 font-weight: 500;
             }
 
-            .ai-reasoning {
-                background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-                border: 1px solid #0284c7;
+            .assessment-banner {
+                padding: 1.25rem;
                 border-radius: 8px;
+                margin-bottom: 1.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .assessment-banner-details h3 {
+                font-size: 1.1rem;
+                font-weight: 700;
+                margin-bottom: 0.25rem;
+                letter-spacing: -0.015em;
+            }
+
+            .assessment-banner-details p {
+                font-size: 0.8rem;
+                opacity: 0.85;
+            }
+
+            .assessment-badge {
+                font-size: 0.75rem;
+                font-weight: 700;
+                padding: 0.375rem 0.75rem;
+                border-radius: 4px;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+
+            .banner-critical { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+            .banner-high { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+            .banner-medium { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+            .banner-low { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+            .banner-minimal { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+
+            .reasoning-box {
+                background: #f0f9ff;
+                border: 1px solid #bae6fd;
+                border-left: 4px solid #0284c7;
+                border-radius: 6px;
                 padding: 1.25rem;
                 margin-bottom: 1.5rem;
             }
 
-            .ai-reasoning h4 {
-                color: #0284c7;
-                margin-bottom: 0.75rem;
+            .reasoning-box h4 {
+                font-size: 0.875rem;
+                color: #0369a1;
+                margin-bottom: 0.5rem;
                 display: flex;
                 align-items: center;
                 gap: 0.5rem;
             }
 
-            .flags-recommendations {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 1rem;
+            .reasoning-box p {
+                font-size: 0.85rem;
+                color: #0c4a6e;
+                line-height: 1.5;
             }
 
-            .flag-item, .recommendation-item {
-                background: var(--bg-white);
-                border: 1px solid var(--border-light);
+            /* Alerts panel lists */
+            .alert-pill {
+                padding: 0.5rem 0.75rem;
                 border-radius: 6px;
-                padding: 0.75rem;
-                margin-bottom: 0.5rem;
-                font-size: 0.9rem;
-            }
-
-            .flag-item {
-                border-left: 3px solid var(--danger-red);
-            }
-
-            .recommendation-item {
-                border-left: 3px solid var(--success-green);
-            }
-
-            .blockchain-stats {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                gap: 1rem;
-                margin-bottom: 1.5rem;
-            }
-
-            .stat-card {
-                background: linear-gradient(135deg, var(--bg-white) 0%, #f8fafc 100%);
-                border: 1px solid var(--border-light);
-                border-radius: 8px;
-                padding: 1rem;
-                text-align: center;
-                transition: transform 0.3s ease;
-            }
-
-            .stat-card:hover {
-                transform: translateY(-2px);
-            }
-
-            .stat-number {
-                font-size: 1.5rem;
-                font-weight: 700;
-                color: var(--primary-blue);
-                margin-bottom: 0.25rem;
-            }
-
-            .stat-label {
                 font-size: 0.8rem;
-                color: var(--text-light);
-                font-weight: 500;
-            }
-
-            .transaction-list {
-                max-height: 400px;
-                overflow-y: auto;
-                background: var(--bg-light);
-                border-radius: 8px;
-                padding: 1rem;
-            }
-
-            .transaction-item {
-                background: var(--bg-white);
-                border: 1px solid var(--border-light);
-                border-radius: 6px;
-                padding: 1rem;
-                margin-bottom: 0.75rem;
-                transition: all 0.3s ease;
-            }
-
-            .transaction-item:hover {
-                box-shadow: var(--shadow-sm);
-                transform: translateX(2px);
-            }
-
-            .transaction-hash {
-                font-family: 'Courier New', monospace;
-                font-size: 0.8rem;
-                color: var(--secondary-blue);
                 margin-bottom: 0.5rem;
-            }
-
-            .transaction-details {
                 display: flex;
-                justify-content: space-between;
                 align-items: center;
-                font-size: 0.9rem;
+                gap: 0.5rem;
+                border: 1px solid transparent;
             }
 
-            .mine-btn {
-                background: linear-gradient(135deg, var(--success-green) 0%, #059669 100%);
-                color: white;
-                padding: 0.75rem 1.5rem;
-                border: none;
-                border-radius: 8px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                margin-top: 1rem;
-                width: 100%;
+            .alert-pill-danger {
+                background: rgba(239, 68, 68, 0.08);
+                border-color: rgba(239, 68, 68, 0.15);
+                color: #b91c1c;
             }
 
-            .mine-btn:hover {
-                transform: translateY(-1px);
-                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+            .alert-pill-success {
+                background: rgba(16, 185, 129, 0.08);
+                border-color: rgba(16, 185, 129, 0.15);
+                color: #047857;
             }
 
-            .success-message {
-                background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-                color: #065f46;
-                padding: 1rem;
-                border-radius: 8px;
-                margin-top: 1rem;
-                text-align: center;
-                font-weight: 600;
+            /* Scrollbars */
+            ::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
             }
 
-            @media (max-width: 768px) {
-                .main-container {
-                    grid-template-columns: 1fr;
-                    gap: 1rem;
-                    padding: 0 1rem;
-                }
-
-                .form-grid {
-                    grid-template-columns: 1fr;
-                }
-
-                .header-content {
-                    flex-direction: column;
-                    gap: 1rem;
-                    text-align: center;
-                }
-
-                .flags-recommendations {
-                    grid-template-columns: 1fr;
-                }
+            ::-webkit-scrollbar-track {
+                background: transparent;
             }
+
+            ::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 3px;
+            }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: #94a3b8;
+            }
+
+            /* Utility classes */
+            .status-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                display: inline-block;
+            }
+
+            .status-dot-success { background: var(--success); }
+            .status-dot-warning { background: var(--warning); }
+            .status-dot-danger { background: var(--danger); }
         </style>
     </head>
     <body>
-        <header class="header">
-            <div class="header-content">
-                <div class="logo-section">
-                    <div class="govt-emblem"><i class="fas fa-shield-halved"></i></div>
-                    <div class="header-title">
-                        <h1>Government Fraud Detection System</h1>
-                        <div class="header-subtitle">Advanced AI-Powered Financial Security Platform</div>
-                    </div>
-                </div>
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <a href="/" style="color: white; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.05); padding: 0.5rem 1rem; border-radius: 6px; font-weight: 500; font-size: 0.8rem; transition: all 0.2s ease; border: 1px solid rgba(255,255,255,0.1);">
+        <div class="sidebar">
+            <div class="sidebar-brand">
+                <i class="fas fa-shield-halved"></i>
+                <span>NEURO-QKAD</span>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item active" onclick="switchTab('overview')">
+                    <i class="fas fa-chart-pie"></i>
+                    Overview Dashboard
+                </li>
+                <li class="menu-item" onclick="switchTab('simulator')">
+                    <i class="fas fa-shield-halved"></i>
+                    Risk Simulation
+                </li>
+                <li class="menu-item" onclick="switchTab('ledger')">
+                    <i class="fas fa-database"></i>
+                    Ledger Audit
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <div>Security Level: Government</div>
+                <div style="margin-top: 0.25rem;">Node ID: node-asia-east-01</div>
+            </div>
+        </div>
+
+        <div class="workspace">
+            <div class="top-bar">
+                <div class="top-bar-title" id="pageTitle">Overview Dashboard</div>
+                <div class="top-bar-actions">
+                    <a href="/" class="badge badge-neutral" style="text-decoration: none;">
                         <i class="fas fa-arrow-left"></i> Landing Page
                     </a>
-                    <div class="security-badge">
-                        <i class="fas fa-shield-alt"></i>
-                        <span>Classified</span>
+                    <div class="badge badge-neutral">
+                        <i class="fas fa-user-shield"></i> Classified
                     </div>
-                    <div id="geminiStatusBadge" class="security-badge">
+                    <div id="geminiStatusBadge" class="badge">
                         <i class="fas fa-brain"></i>
                         <span id="geminiStatusText">Gemini: Connecting...</span>
                     </div>
                 </div>
             </div>
-        </header>
 
-        <div class="main-container">
-            <div class="panel">
-                <div class="panel-header">
-                    <i class="fas fa-search"></i>
-                    <h2>Transaction Analysis Center</h2>
-                </div>
-                <div class="panel-content">
-                    <form id="fraudForm">
-                        <div class="form-section">
-                            <div class="section-title">
-                                <i class="fas fa-money-bill-wave"></i>
-                                Transaction Details
+            <div class="content-area">
+                <!-- TAB 1: OVERVIEW DASHBOARD -->
+                <div id="tab-overview" class="tab-content active">
+                    <div class="kpi-row">
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span>Total Ledger Blocks</span>
+                                <i class="fas fa-cubes"></i>
                             </div>
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label for="amount"><i class="fa-solid fa-wallet label-icon"></i>Amount (₹)</label>
-                                    <input type="number" id="amount" name="amount" value="75000" step="0.01" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="hour_of_day"><i class="fa-solid fa-clock label-icon"></i>Hour of Day</label>
-                                    <input type="number" id="hour_of_day" name="hour_of_day" value="2" min="0" max="23" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="is_weekend"><i class="fa-solid fa-calendar label-icon"></i>Weekend Transaction</label>
-                                    <select id="is_weekend" name="is_weekend" required>
-                                        <option value="0">No</option>
-                                        <option value="1" selected>Yes</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="day_of_week"><i class="fa-solid fa-calendar-day label-icon"></i>Day of Week</label>
-                                    <select id="day_of_week" name="day_of_week" required>
-                                        <option value="Monday">Monday</option>
-                                        <option value="Tuesday">Tuesday</option>
-                                        <option value="Wednesday">Wednesday</option>
-                                        <option value="Thursday">Thursday</option>
-                                        <option value="Friday">Friday</option>
-                                        <option value="Saturday" selected>Saturday</option>
-                                        <option value="Sunday">Sunday</option>
-                                    </select>
-                                </div>
+                            <div class="kpi-val" id="totalBlocks">-</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span>Audited Transactions</span>
+                                <i class="fas fa-check-double"></i>
                             </div>
+                            <div class="kpi-val" id="totalTransactions">-</div>
                         </div>
-
-                        <div class="form-section">
-                            <div class="section-title">
-                                <i class="fas fa-users"></i>
-                                Parties Information
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span>Pending Operations</span>
+                                <i class="fas fa-clock"></i>
                             </div>
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label for="sender_age_group"><i class="fa-solid fa-user label-icon"></i>Sender Age Group</label>
-                                    <select id="sender_age_group" name="sender_age_group" required>
-                                        <option value="18-25" selected>18-25</option>
-                                        <option value="26-35">26-35</option>
-                                        <option value="36-50">36-50</option>
-                                        <option value="50+">50+</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="receiver_age_group"><i class="fa-solid fa-users label-icon"></i>Receiver Age Group</label>
-                                    <select id="receiver_age_group" name="receiver_age_group" required>
-                                        <option value="18-25">18-25</option>
-                                        <option value="26-35" selected>26-35</option>
-                                        <option value="36-50">36-50</option>
-                                        <option value="50+">50+</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="sender_state"><i class="fa-solid fa-location-dot label-icon"></i>Sender State</label>
-                                    <select id="sender_state" name="sender_state" required>
-                                        <option value="Delhi" selected>Delhi</option>
-                                        <option value="Mumbai">Mumbai</option>
-                                        <option value="Bangalore">Bangalore</option>
-                                        <option value="Chennai">Chennai</option>
-                                        <option value="Kolkata">Kolkata</option>
-                                        <option value="Hyderabad">Hyderabad</option>
-                                        <option value="Pune">Pune</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="sender_bank"><i class="fa-solid fa-building-columns label-icon"></i>Sender Bank</label>
-                                    <select id="sender_bank" name="sender_bank" required>
-                                        <option value="SBI">SBI</option>
-                                        <option value="HDFC" selected>HDFC</option>
-                                        <option value="ICICI">ICICI</option>
-                                        <option value="Axis">Axis</option>
-                                        <option value="PNB">PNB</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="receiver_bank"><i class="fa-solid fa-building label-icon"></i>Receiver Bank</label>
-                                    <select id="receiver_bank" name="receiver_bank" required>
-                                        <option value="SBI" selected>SBI</option>
-                                        <option value="HDFC">HDFC</option>
-                                        <option value="ICICI">ICICI</option>
-                                        <option value="Axis">Axis</option>
-                                        <option value="PNB">PNB</option>
-                                    </select>
-                                </div>
+                            <div class="kpi-val" id="pendingTransactions">-</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span>Optimal Risk Limit</span>
+                                <i class="fas fa-sliders-h"></i>
                             </div>
-                        </div>
-
-                        <div class="form-section">
-                            <div class="section-title">
-                                <i class="fas fa-cog"></i>
-                                Technical Details
-                            </div>
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label for="merchant_category"><i class="fa-solid fa-store label-icon"></i>Merchant Category</label>
-                                    <select id="merchant_category" name="merchant_category" required>
-                                        <option value="Grocery">Grocery</option>
-                                        <option value="Fuel">Fuel</option>
-                                        <option value="Restaurant">Restaurant</option>
-                                        <option value="Entertainment" selected>Entertainment</option>
-                                        <option value="Shopping">Shopping</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="device_type"><i class="fa-solid fa-mobile-screen label-icon"></i>Device Type</label>
-                                    <select id="device_type" name="device_type" required>
-                                        <option value="Android" selected>Android</option>
-                                        <option value="iOS">iOS</option>
-                                        <option value="Web">Web</option>
-                                        <option value="ATM">ATM</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="transaction_type"><i class="fa-solid fa-credit-card label-icon"></i>Transaction Type</label>
-                                    <select id="transaction_type" name="transaction_type" required>
-                                        <option value="P2P" selected>P2P</option>
-                                        <option value="P2M">P2M</option>
-                                        <option value="Merchant">Merchant</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="network_type"><i class="fa-solid fa-wifi label-icon"></i>Network Type</label>
-                                    <select id="network_type" name="network_type" required>
-                                        <option value="4G" selected>4G</option>
-                                        <option value="WiFi">WiFi</option>
-                                        <option value="3G">3G</option>
-                                        <option value="5G">5G</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="transaction_status"><i class="fa-solid fa-circle-check label-icon"></i>Transaction Status</label>
-                                    <select id="transaction_status" name="transaction_status" required>
-                                        <option value="SUCCESS" selected>SUCCESS</option>
-                                        <option value="PENDING">PENDING</option>
-                                        <option value="FAILED">FAILED</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="submit-btn" id="analyzeBtn">
-                            <i class="fas fa-search"></i> Analyze Transaction
-                        </button>
-                    </form>
-
-                    <div class="loading" id="loading">
-                        <div class="spinner"></div>
-                        <p><strong>Processing with Advanced AI Systems...</strong></p>
-                        <p style="font-size: 0.9rem; color: var(--text-light);">Quantum Computing • Machine Learning • Gemini AI</p>
-                    </div>
-
-                    <div id="results" class="results"></div>
-                </div>
-            </div>
-
-            <div class="panel" style="margin-bottom: 2rem;">
-                <div class="panel-header" style="background: linear-gradient(90deg, var(--warning-orange) 0%, var(--danger-red) 100%);">
-                    <i class="fas fa-sliders-h"></i>
-                    <h2>AI Risk Manager Cost Controller</h2>
-                </div>
-                <div class="panel-content">
-                    <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1.25rem;">
-                        Balance false-positive friction costs (blocking good transactions) vs. false-negative fraud losses (missed chargebacks) to dynamically optimize the model's threshold boundaries.
-                    </p>
-                    
-                    <div style="margin-bottom: 1.25rem;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 500;">
-                            <span>FP Friction Cost (Falsely Flagged)</span>
-                            <span id="valFriction" style="color: var(--primary-blue); font-weight: 600;">₹1,000</span>
-                        </div>
-                        <input type="range" id="sliderFriction" min="500" max="5000" step="100" value="1000" style="cursor: pointer;" oninput="updateCosts()">
-                    </div>
-                    
-                    <div style="margin-bottom: 1.25rem;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 500;">
-                            <span>FN Fraud Loss (Chargebacks & Fees)</span>
-                            <span id="valFraud" style="color: var(--danger-red); font-weight: 600;">₹5,000</span>
-                        </div>
-                        <input type="range" id="sliderFraud" min="2000" max="20000" step="500" value="5000" style="cursor: pointer;" oninput="updateCosts()">
-                    </div>
-
-                    <div style="background: var(--bg-light); border: 1px solid var(--border-light); border-radius: 8px; padding: 1rem; margin-top: 1.25rem;">
-                        <h4 style="font-size: 0.9rem; color: var(--primary-blue); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="fas fa-chart-line"></i> Dynamic Cost-Optimized Metrics
-                        </h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.85rem;">
-                            <div>Optimal Threshold: <strong id="optThreshold" style="color: var(--primary-blue);">45%</strong></div>
-                            <div>F1 Score: <strong id="optF1">85.2%</strong></div>
-                            <div>Precision: <strong id="optPrecision">83.3%</strong></div>
-                            <div>Recall: <strong id="optRecall">87.5%</strong></div>
-                            <div>False Positives: <strong id="optFPs" style="color: var(--warning-orange);">1</strong></div>
-                            <div>False Negatives: <strong id="optFNs" style="color: var(--danger-red);">2</strong></div>
-                        </div>
-                        <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed var(--border-light); font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
-                            <span>Optimized Savings:</span>
-                            <strong style="color: var(--success-green); font-size: 1rem;" id="optSavings">₹18,500</strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="panel">
-                <div class="panel-header">
-                    <i class="fas fa-link"></i>
-                    <h2>Blockchain Security Network</h2>
-                </div>
-                <div class="panel-content">
-                    <div class="blockchain-stats" id="blockchainStats">
-                        <div class="stat-card">
-                            <div class="stat-number" id="totalBlocks">-</div>
-                            <div class="stat-label">Total Blocks</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="totalTransactions">-</div>
-                            <div class="stat-label">Total Transactions</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="pendingTransactions">-</div>
-                            <div class="stat-label">Pending Analysis</div>
+                            <div class="kpi-val" id="kpiThreshold">45%</div>
                         </div>
                     </div>
 
-                    <button class="mine-btn" onclick="mineBlock()">
-                        <i class="fas fa-cube"></i> Secure to Blockchain
-                    </button>
-                    <div id="miningStatus"></div>
+                    <div class="split-row">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-sliders-h"></i>
+                                    Merchant Risk Optimizer
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.4;">
+                                    Adjust your relative cost bounds for false alarms (FP Friction Cost) and missed scams (FN Fraud Loss) to minimize operational overhead.
+                                </p>
+                                
+                                <div class="slider-group">
+                                    <div class="slider-header">
+                                        <span>False Positive Friction (Falsely Blocked)</span>
+                                        <span class="slider-val" id="valFriction" style="color: var(--primary);">₹1,000</span>
+                                    </div>
+                                    <input type="range" id="sliderFriction" class="slider-input" min="500" max="5000" step="100" value="1000" oninput="updateCosts()">
+                                </div>
+                                
+                                <div class="slider-group">
+                                    <div class="slider-header">
+                                        <span>False Negative Fraud Loss (Missed Scam)</span>
+                                        <span class="slider-val" id="valFraud" style="color: var(--danger);">₹5,000</span>
+                                    </div>
+                                    <input type="range" id="sliderFraud" class="slider-input" min="2000" max="20000" step="500" value="5000" oninput="updateCosts()">
+                                </div>
 
-                    <h3 style="margin: 1.5rem 0 1rem 0; color: var(--primary-blue);">
-                        <i class="fas fa-list"></i> Recent Transaction Analysis
-                    </h3>
-                    <div class="transaction-list" id="transactionList">
-                        <p style="text-align: center; color: var(--text-light);">Loading transaction history...</p>
+                                <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-top: 1.25rem;">
+                                    <h4 style="font-size: 0.85rem; color: var(--primary); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                                        <i class="fas fa-chart-line"></i> Dynamic Cost-Optimized Metrics
+                                    </h4>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.8rem;">
+                                        <div>Optimal Threshold: <strong id="optThreshold" style="color: var(--primary);">45%</strong></div>
+                                        <div>F1 Score: <strong id="optF1">85.2%</strong></div>
+                                        <div>Precision: <strong id="optPrecision">83.3%</strong></div>
+                                        <div>Recall: <strong id="optRecall">87.5%</strong></div>
+                                        <div>False Positives: <strong id="optFPs" style="color: var(--warning);">1</strong></div>
+                                        <div>False Negatives: <strong id="optFNs" style="color: var(--danger);">2</strong></div>
+                                    </div>
+                                    <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed var(--border-color); font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; font-weight: 500;">
+                                        <span>Calculated Monthly Savings:</span>
+                                        <strong style="color: var(--success); font-size: 1rem;" id="optSavings">₹18,500</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-list"></i>
+                                    Real-Time Operations Log
+                                </h3>
+                            </div>
+                            <div class="card-body" style="padding: 0;">
+                                <div class="table-container" style="max-height: 380px; overflow-y: auto;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Transaction</th>
+                                                <th>Amount</th>
+                                                <th>Risk Score</th>
+                                                <th>Assessment</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="transactionListTable">
+                                            <!-- Dynamic rows -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: RISK SIMULATION -->
+                <div id="tab-simulator" class="tab-content">
+                    <div class="split-row">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-terminal"></i>
+                                    Simulated Transaction Input
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="fraudForm">
+                                    <div class="form-section-title">Details & Demographics</div>
+                                    <div class="simulator-grid">
+                                        <div class="form-item">
+                                            <label for="amount"><i class="fa-solid fa-wallet"></i> Amount (₹)</label>
+                                            <input type="number" id="amount" name="amount" class="form-control" value="75000" step="0.01" required>
+                                        </div>
+                                        <div class="form-item">
+                                            <label for="hour_of_day"><i class="fa-solid fa-clock"></i> Hour of Day</label>
+                                            <input type="number" id="hour_of_day" name="hour_of_day" class="form-control" value="2" min="0" max="23" required>
+                                        </div>
+                                        <div class="form-item">
+                                            <label for="is_weekend"><i class="fa-solid fa-calendar"></i> Weekend</label>
+                                            <select id="is_weekend" name="is_weekend" class="form-control" required>
+                                                <option value="0">No</option>
+                                                <option value="1" selected>Yes</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-item">
+                                            <label for="day_of_week"><i class="fa-solid fa-calendar-day"></i> Day of Week</label>
+                                            <select id="day_of_week" name="day_of_week" class="form-control" required>
+                                                <option value="Monday">Monday</option>
+                                                <option value="Tuesday">Tuesday</option>
+                                                <option value="Wednesday">Wednesday</option>
+                                                <option value="Thursday">Thursday</option>
+                                                <option value="Friday">Friday</option>
+                                                <option value="Saturday" selected>Saturday</option>
+                                                <option value="Sunday">Sunday</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-item">
+                                            <label for="sender_age_group"><i class="fa-solid fa-user"></i> Sender Age</label>
+                                            <select id="sender_age_group" name="sender_age_group" class="form-control" required>
+                                                <option value="18-25" selected>18-25</option>
+                                                <option value="26-35">26-35</option>
+                                                <option value="36-50">36-50</option>
+                                                <option value="50+">50+</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-item">
+                                            <label for="receiver_age_group"><i class="fa-solid fa-users"></i> Receiver Age</label>
+                                            <select id="receiver_age_group" name="receiver_age_group" class="form-control" required>
+                                                <option value="18-25">18-25</option>
+                                                <option value="26-35" selected>26-35</option>
+                                                <option value="36-50">36-50</option>
+                                                <option value="50+">50+</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-item">
+                                            <label for="sender_state"><i class="fa-solid fa-location-dot"></i> Sender State</label>
+                                            <select id="sender_state" name="sender_state" class="form-control" required>
+                                                <option value="Delhi" selected>Delhi</option>
+                                                <option value="Mumbai">Mumbai</option>
+                                                <option value="Bangalore">Bangalore</option>
+                                                <option value="Chennai">Chennai</option>
+                                                <option value="Kolkata">Kolkata</option>
+                                                <option value="Hyderabad">Hyderabad</option>
+                                                <option value="Pune">Pune</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-item">
+                                            <label for="sender_bank"><i class="fa-solid fa-building-columns"></i> Sender Bank</label>
+                                            <select id="sender_bank" name="sender_bank" class="form-control" required>
+                                                <option value="SBI">SBI</option>
+                                                <option value="HDFC" selected>HDFC</option>
+                                                <option value="ICICI">ICICI</option>
+                                                <option value="Axis">Axis</option>
+                                                <option value="PNB">PNB</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-item">
+                                            <label for="receiver_bank"><i class="fa-solid fa-building"></i> Receiver Bank</label>
+                                            <select id="receiver_bank" name="receiver_bank" class="form-control" required>
+                                                <option value="SBI" selected>SBI</option>
+                                                <option value="HDFC">HDFC</option>
+                                                <option value="ICICI">ICICI</option>
+                                                <option value="Axis">Axis</option>
+                                                <option value="PNB">PNB</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-section-title">Technical Metainfo</div>
+                                    <div class="simulator-grid">
+                                        <div class="form-item">
+                                            <label for="merchant_category"><i class="fa-solid fa-store"></i> Category</label>
+                                            <select id="merchant_category" name="merchant_category" class="form-control" required>
+                                                <option value="Grocery">Grocery</option>
+                                                <option value="Fuel">Fuel</option>
+                                                <option value="Restaurant">Restaurant</option>
+                                                <option value="Entertainment" selected>Entertainment</option>
+                                                <option value="Shopping">Shopping</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-item">
+                                            <label for="device_type"><i class="fa-solid fa-mobile-screen"></i> Device</label>
+                                            <select id="device_type" name="device_type" class="form-control" required>
+                                                <option value="Android" selected>Android</option>
+                                                <option value="iOS">iOS</option>
+                                                <option value="Web">Web</option>
+                                                <option value="ATM">ATM</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-item">
+                                            <label for="transaction_type"><i class="fa-solid fa-credit-card"></i> Type</label>
+                                            <select id="transaction_type" name="transaction_type" class="form-control" required>
+                                                <option value="P2P" selected>P2P</option>
+                                                <option value="P2M">P2M</option>
+                                                <option value="Merchant">Merchant</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-item">
+                                            <label for="network_type"><i class="fa-solid fa-wifi"></i> Network</label>
+                                            <select id="network_type" name="network_type" class="form-control" required>
+                                                <option value="4G" selected>4G</option>
+                                                <option value="WiFi">WiFi</option>
+                                                <option value="3G">3G</option>
+                                                <option value="5G">5G</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-item" style="grid-column: 1 / -1;">
+                                            <label for="transaction_status"><i class="fa-solid fa-circle-check"></i> Status</label>
+                                            <select id="transaction_status" name="transaction_status" class="form-control" required>
+                                                <option value="SUCCESS" selected>SUCCESS</option>
+                                                <option value="PENDING">PENDING</option>
+                                                <option value="FAILED">FAILED</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" id="analyzeBtn">
+                                        <i class="fas fa-magnifying-glass"></i> Analyze & Grade Risk
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-chart-bar"></i>
+                                    Real-Time Meta-Fusion Output
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="loading" id="loading" style="display: none; padding: 4rem 1rem; text-align: center;">
+                                    <div class="spinner" style="border: 3px solid var(--border-color); border-top: 3px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
+                                    <p style="font-weight: 600;">Executing Four-Tier Classifier Overlap...</p>
+                                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">PennyLane State Overlaps • XGBoost Trees • Gemini Reasonings</p>
+                                </div>
+
+                                <div id="results" style="display: none;">
+                                    <!-- Dynamic Output Injection -->
+                                </div>
+
+                                <div id="placeholderResult" style="padding: 6rem 2rem; text-align: center; color: var(--text-muted); border: 2px dashed var(--border-color); border-radius: 8px;">
+                                    <i class="fas fa-shield-halved" style="font-size: 3rem; margin-bottom: 1rem; color: #cbd5e1;"></i>
+                                    <h3>Risk Audit Status: Awaiting Entry</h3>
+                                    <p style="font-size: 0.85rem; margin-top: 0.25rem;">Fill in the transaction details on the left pane and submit the query to execute grading.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: LEDGER AUDIT -->
+                <div id="tab-ledger" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-cubes"></i>
+                                Cryptographic Block Consensus
+                            </h3>
+                            <button class="btn btn-primary" onclick="mineBlock()">
+                                <i class="fas fa-cube"></i> Mine Pending Transactions
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 6px; padding: 1.25rem; display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
+                                <div>
+                                    <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Network Sync State</span>
+                                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--success); display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem;">
+                                        <span class="status-dot status-dot-success"></span> Local Node Consensus Validated
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Cryptographic Algorithm</span>
+                                    <div style="font-size: 1.1rem; font-weight: 700; margin-top: 0.25rem;">SHA-256 Consensus Chain</div>
+                                </div>
+                            </div>
+                            <div id="miningStatus"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-server"></i>
+                                Active Blockchain Ledger Registry
+                            </h3>
+                        </div>
+                        <div class="card-body" style="padding: 0;">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Block Index</th>
+                                            <th>Block Hash</th>
+                                            <th>Volume</th>
+                                            <th>Timestamp</th>
+                                            <th>Consensus Proof</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="blockchainTableBody">
+                                        <!-- Dynamic Block list rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <script>
+            // Tab switching logic
+            function switchTab(tabId) {
+                // Remove active classes
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+                
+                // Add active classes
+                document.getElementById('tab-' + tabId).classList.add('active');
+                
+                // Highlight correct nav menu item
+                const menuItems = document.querySelectorAll('.menu-item');
+                if (tabId === 'overview') {
+                    menuItems[0].classList.add('active');
+                    document.getElementById('pageTitle').textContent = 'Overview Dashboard';
+                } else if (tabId === 'simulator') {
+                    menuItems[1].classList.add('active');
+                    document.getElementById('pageTitle').textContent = 'Risk Simulation Console';
+                } else if (tabId === 'ledger') {
+                    menuItems[2].classList.add('active');
+                    document.getElementById('pageTitle').textContent = 'Cryptographic Ledger Explorer';
+                    loadLedgerBlocks();
+                }
+            }
+
             // Auto-update current time
             document.getElementById('hour_of_day').value = new Date().getHours();
             
@@ -1448,6 +1700,7 @@ async def dashboard():
                 // Show loading
                 document.getElementById('loading').style.display = 'block';
                 document.getElementById('results').style.display = 'none';
+                document.getElementById('placeholderResult').style.display = 'none';
                 document.getElementById('analyzeBtn').disabled = true;
                 
                 try {
@@ -1469,8 +1722,8 @@ async def dashboard():
                 } catch (error) {
                     console.error('Error:', error);
                     document.getElementById('results').innerHTML = `
-                        <div class="ai-reasoning" style="border-color: var(--danger-red);">
-                            <h4 style="color: var(--danger-red);"><i class="fas fa-exclamation-triangle"></i> System Error</h4>
+                        <div class="reasoning-box" style="border-color: var(--danger); border-left-color: var(--danger);">
+                            <h4 style="color: var(--danger);"><i class="fas fa-exclamation-triangle"></i> System Error</h4>
                             <p>Unable to process transaction analysis. Please try again.</p>
                         </div>
                     `;
@@ -1482,77 +1735,71 @@ async def dashboard():
             });
 
             function displayResults(result) {
-                const riskClass = getRiskClass(result.risk_level);
+                let badgeClass = 'banner-minimal';
+                if (result.risk_level.includes('CRITICAL')) badgeClass = 'banner-critical';
+                else if (result.risk_level.includes('HIGH')) badgeClass = 'banner-high';
+                else if (result.risk_level.includes('MEDIUM')) badgeClass = 'banner-medium';
+                else if (result.risk_level.includes('LOW')) badgeClass = 'banner-low';
                 
                 const flagsHtml = result.security_flags.map(flag => 
-                    `<div class="flag-item"><i class="fas fa-exclamation-triangle"></i> ${flag}</div>`
+                    `<div class="alert-pill alert-pill-danger"><i class="fas fa-exclamation-triangle"></i> ${flag}</div>`
                 ).join('');
                 
                 const recommendationsHtml = result.recommendations.map(rec => 
-                    `<div class="recommendation-item"><i class="fas fa-check-circle"></i> ${rec}</div>`
+                    `<div class="alert-pill alert-pill-success"><i class="fas fa-check-circle"></i> ${rec}</div>`
                 ).join('');
 
                 const html = `
-                    <div class="risk-header ${riskClass}">
-                        <h3><i class="fas fa-shield-alt"></i> ${result.risk_level}</h3>
-                        <p>Transaction Hash: <code>${result.transaction_hash}</code></p>
-                        <p>Confidence Level: ${result.confidence}</p>
+                    <div class="assessment-banner ${badgeClass}">
+                        <div class="assessment-banner-details">
+                            <h3>Assessment: ${result.risk_level}</h3>
+                            <p>Reference Hash: <code>${result.transaction_hash}</code></p>
+                        </div>
+                        <span class="assessment-badge ${badgeClass}">${result.confidence} Confidence</span>
                     </div>
                     
-                    <div class="score-grid">
-                        <div class="score-card">
-                            <div class="score-value" style="color: #8b5cf6;">${result.quantum_score}%</div>
-                            <div class="score-label">Quantum AI</div>
+                    <div class="score-breakdown-grid">
+                        <div class="score-gauge-card">
+                            <div class="score-gauge-val" style="color: #8b5cf6;">${result.quantum_score}%</div>
+                            <div class="score-gauge-lbl">Quantum AI</div>
                         </div>
-                        <div class="score-card">
-                            <div class="score-value" style="color: #f59e0b;">${result.classical_score}%</div>
-                            <div class="score-label">Machine Learning</div>
+                        <div class="score-gauge-card">
+                            <div class="score-gauge-val" style="color: #f59e0b;">${result.classical_score}%</div>
+                            <div class="score-gauge-lbl">Machine Learning</div>
                         </div>
-                        <div class="score-card">
-                            <div class="score-value" style="color: #10b981;">${result.logical_score}%</div>
-                            <div class="score-label">Rule Engine</div>
+                        <div class="score-gauge-card">
+                            <div class="score-gauge-val" style="color: #10b981;">${result.logical_score}%</div>
+                            <div class="score-gauge-lbl">Rule Engine</div>
                         </div>
-                        <div class="score-card">
-                            <div class="score-value" style="color: var(--primary-blue); font-size: 1.75rem;">${result.fusion_score}%</div>
-                            <div class="score-label">Final Risk Score</div>
+                        <div class="score-gauge-card" style="background: #e0f2fe; border-color: #bae6fd;">
+                            <div class="score-gauge-val" style="color: #0369a1;">${result.fusion_score}%</div>
+                            <div class="score-gauge-lbl" style="color: #0369a1; font-weight: bold;">Fusion Score</div>
                         </div>
                     </div>
                     
-                    <div class="ai-reasoning">
-                        <h4><i class="fas fa-brain"></i> AI Analysis (Gemini Flash)</h4>
+                    <div class="reasoning-box">
+                        <h4><i class="fas fa-brain"></i> Threat Analysis (Gemini Flash)</h4>
                         <p>${result.ai_reasoning}</p>
                     </div>
                     
-                    <div class="flags-recommendations">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <div>
-                            <h4 style="color: var(--danger-red); margin-bottom: 0.75rem;">
+                            <h4 style="font-size: 0.85rem; color: var(--danger); margin-bottom: 0.5rem; font-weight: 600;">
                                 <i class="fas fa-flag"></i> Security Flags
                             </h4>
-                            ${flagsHtml || '<div class="flag-item">No security flags detected</div>'}
+                            ${flagsHtml || '<div class="alert-pill alert-pill-neutral">No indicators detected</div>'}
                         </div>
                         <div>
-                            <h4 style="color: var(--success-green); margin-bottom: 0.75rem;">
+                            <h4 style="font-size: 0.85rem; color: var(--success); margin-bottom: 0.5rem; font-weight: 600;">
                                 <i class="fas fa-lightbulb"></i> Recommendations
                             </h4>
                             ${recommendationsHtml}
                         </div>
                     </div>
-                    
-                    <div class="success-message">
-                        <i class="fas fa-database"></i> Transaction secured in government database and ready for blockchain verification
-                    </div>
                 `;
                 
                 document.getElementById('results').innerHTML = html;
                 document.getElementById('results').style.display = 'block';
-            }
-
-            function getRiskClass(riskLevel) {
-                if (riskLevel.includes('CRITICAL')) return 'risk-critical';
-                if (riskLevel.includes('HIGH')) return 'risk-high';
-                if (riskLevel.includes('MEDIUM')) return 'risk-medium';
-                if (riskLevel.includes('LOW')) return 'risk-low';
-                return 'risk-minimal';
             }
 
             async function loadBlockchainStats() {
@@ -1574,52 +1821,89 @@ async def dashboard():
                     const transactions = await response.json();
                     
                     const html = transactions.map(tx => {
-                        const riskClass = getRiskClass(tx.risk_level || 'UNKNOWN');
+                        const score = tx.fusion_score ? tx.fusion_score.toFixed(1) + '%' : '-';
+                        let badgeClass = 'banner-minimal';
+                        if (tx.risk_level.includes('CRITICAL')) badgeClass = 'banner-critical';
+                        else if (tx.risk_level.includes('HIGH')) badgeClass = 'banner-high';
+                        else if (tx.risk_level.includes('MEDIUM')) badgeClass = 'banner-medium';
+                        else if (tx.risk_level.includes('LOW')) badgeClass = 'banner-low';
                         
                         return `
-                            <div class="transaction-item">
-                                <div class="transaction-hash">${tx.transaction_hash.substring(0, 20)}...</div>
-                                <div class="transaction-details">
-                                    <span><strong>₹${tx.amount.toLocaleString()}</strong></span>
-                                    <span class="${riskClass}">${tx.risk_level || 'Pending'}</span>
-                                    <span><strong>${tx.fusion_score ? tx.fusion_score.toFixed(1) + '%' : '-'}</strong></span>
-                                </div>
-                            </div>
+                            <tr>
+                                <td><code>${tx.transaction_hash.substring(0, 12)}...</code></td>
+                                <td><strong>₹${tx.amount.toLocaleString()}</strong></td>
+                                <td><span style="font-weight: 600;">${score}</span></td>
+                                <td><span class="assessment-badge ${badgeClass}">${tx.risk_level}</span></td>
+                            </tr>
                         `;
                     }).join('');
                     
-                    document.getElementById('transactionList').innerHTML = html || 
-                        '<p style="text-align: center; color: var(--text-light);">No transactions found</p>';
+                    document.getElementById('transactionListTable').innerHTML = html || 
+                        '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No transactions found</td></tr>';
                 } catch (error) {
                     console.error('Error loading transactions:', error);
-                    document.getElementById('transactionList').innerHTML = 
-                        '<p style="text-align: center; color: var(--danger-red);">Error loading transaction history</p>';
+                    document.getElementById('transactionListTable').innerHTML = 
+                        '<tr><td colspan="4" style="text-align: center; color: var(--danger);">Error loading transaction history</td></tr>';
+                }
+            }
+
+            async function loadLedgerBlocks() {
+                try {
+                    const response = await fetch('/blockchain/stats');
+                    const info = await response.json();
+                    const tableBody = document.getElementById('blockchainTableBody');
+                    
+                    if (info.chain && info.chain.length > 0) {
+                        tableBody.innerHTML = info.chain.map(block => `
+                            <tr>
+                                <td><strong>#${block.index}</strong></td>
+                                <td><code>${block.hash.substring(0, 16)}...</code></td>
+                                <td>${block.transactions ? block.transactions.length : 0} items</td>
+                                <td>${new Date(block.timestamp * 1000).toLocaleTimeString()}</td>
+                                <td><code>${block.proof}</code></td>
+                            </tr>
+                        `).join('');
+                    } else {
+                        tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center;">No ledger blocks synced.</td></tr>`;
+                    }
+                } catch (error) {
+                    console.error('Error loading ledger blocks:', error);
                 }
             }
 
             async function mineBlock() {
                 try {
                     document.getElementById('miningStatus').innerHTML = `
-                        <div class="loading" style="display: block; margin-top: 1rem;">
-                            <div class="spinner"></div>
-                            <p><strong>Securing transactions to blockchain...</strong></p>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 1rem; color: var(--primary);">
+                            <div class="spinner" style="width: 20px; height: 20px; border-width: 2px; border-top-color: var(--primary); animation: spin 1s linear infinite; border-radius: 50%; border-style: solid; border-color: var(--border-color);"></div>
+                            <span>Securing blocks to ledger proof...</span>
                         </div>
                     `;
                     
-                    const response = await fetch('/blockchain/mine', { method: 'POST' });
+                    const response = await fetch('/blockchain/mine', {
+                        method: 'POST'
+                    });
+                    
+                    if (!response.ok) {
+                        const err = await response.json();
+                        throw new Error(err.detail || 'Mining failed');
+                    }
+                    
                     const result = await response.json();
                     
                     document.getElementById('miningStatus').innerHTML = `
-                        <div class="success-message" style="margin-top: 1rem;">
-                            <i class="fas fa-cube"></i> <strong>Block Successfully Mined!</strong><br>
-                            <small>Hash: ${result.block_hash.substring(0, 20)}...</small><br>
-                            <small>Transactions Secured: ${result.transactions_count}</small>
+                        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 1rem; border-radius: 6px; color: var(--success); margin-top: 1rem;">
+                            <h4 style="font-size: 0.9rem; font-weight: 600;"><i class="fas fa-check-circle"></i> Block Mined Successfully!</h4>
+                            <p style="font-size: 0.8rem; margin-top: 0.25rem;">Block Index: <strong>#${result.index}</strong> | Proof: <code>${result.proof}</code></p>
                         </div>
                     `;
                     
                     // Refresh stats and transactions
                     loadBlockchainStats();
                     loadRecentTransactions();
+                    if (document.getElementById('tab-ledger').classList.contains('active')) {
+                        loadLedgerBlocks();
+                    }
                     
                     // Clear mining status after 5 seconds
                     setTimeout(() => {
@@ -1628,8 +1912,12 @@ async def dashboard():
                     
                 } catch (error) {
                     console.error('Error mining block:', error);
-                    document.getElementById('miningStatus').innerHTML = 
-                        '<p style="color: var(--danger-red); text-align: center; margin-top: 1rem;">Error securing to blockchain</p>';
+                    document.getElementById('miningStatus').innerHTML = `
+                        <div style="background: rgba(220, 38, 38, 0.1); border: 1px solid rgba(220, 38, 38, 0.2); padding: 1rem; border-radius: 6px; color: var(--danger); margin-top: 1rem;">
+                            <h4 style="font-size: 0.9rem; font-weight: 600;"><i class="fas fa-exclamation-triangle"></i> Mining Failed</h4>
+                            <p style="font-size: 0.8rem; margin-top: 0.25rem;">${error.message}</p>
+                        </div>
+                    `;
                 }
             }
 
@@ -1645,6 +1933,7 @@ async def dashboard():
                     const data = await response.json();
                     
                     document.getElementById('optThreshold').textContent = Math.round(data.optimal_threshold * 100) + '%';
+                    document.getElementById('kpiThreshold').textContent = Math.round(data.optimal_threshold * 100) + '%';
                     document.getElementById('optF1').textContent = (data.f1 * 100).toFixed(1) + '%';
                     document.getElementById('optPrecision').textContent = (data.precision * 100).toFixed(1) + '%';
                     document.getElementById('optRecall').textContent = (data.recall * 100).toFixed(1) + '%';
@@ -1667,14 +1956,10 @@ async def dashboard():
                     const text = document.getElementById('geminiStatusText');
                     
                     if (health.gemini_ai_enabled) {
-                        badge.style.background = 'rgba(52, 211, 153, 0.15)';
-                        badge.style.borderColor = 'rgba(52, 211, 153, 0.3)';
-                        badge.style.color = '#34d399';
+                        badge.className = 'badge badge-active';
                         text.textContent = 'Gemini: Active';
                     } else {
-                        badge.style.background = 'rgba(245, 158, 11, 0.15)';
-                        badge.style.borderColor = 'rgba(245, 158, 11, 0.3)';
-                        badge.style.color = '#fbbf24';
+                        badge.className = 'badge badge-warning';
                         text.textContent = 'Gemini: Fallback Active';
                     }
                 } catch (error) {
