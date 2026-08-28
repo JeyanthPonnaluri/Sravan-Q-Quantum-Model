@@ -687,19 +687,19 @@ async def dashboard():
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
         <style>
             :root {
-                --primary-blue: #1e40af;
-                --secondary-blue: #3b82f6;
-                --accent-gold: #fbbf24;
-                --text-dark: #1f2937;
-                --text-light: #6b7280;
-                --bg-light: #f8fafc;
+                --primary-blue: #0f172a;       /* Slate 900 */
+                --secondary-blue: #1e293b;     /* Slate 800 */
+                --accent-gold: #f1f5f9;        /* Slate 100 */
+                --text-dark: #0f172a;          /* Slate 900 */
+                --text-light: #64748b;         /* Slate 500 */
+                --bg-light: #f8fafc;           /* Slate 50 */
                 --bg-white: #ffffff;
-                --border-light: #e5e7eb;
-                --success-green: #10b981;
-                --warning-orange: #f59e0b;
-                --danger-red: #ef4444;
+                --border-light: #e2e8f0;       /* Slate 200 */
+                --success-green: #059669;      /* Emerald 600 */
+                --warning-orange: #d97706;     /* Amber 600 */
+                --danger-red: #dc2626;         /* Red 600 */
                 --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-                --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
             }
 
             * {
@@ -716,31 +716,17 @@ async def dashboard():
             }
 
             .header {
-                background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+                background: #0f172a;
                 color: white;
-                padding: 1.5rem 0;
-                box-shadow: var(--shadow-lg);
+                padding: 1.25rem 0;
+                border-bottom: 1px solid #1e293b;
                 position: relative;
-                overflow: hidden;
-            }
-
-            .header::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-                opacity: 0.3;
             }
 
             .header-content {
-                max-width: 1200px;
+                max-width: 1400px;
                 margin: 0 auto;
                 padding: 0 2rem;
-                position: relative;
-                z-index: 1;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
@@ -749,20 +735,20 @@ async def dashboard():
             .logo-section {
                 display: flex;
                 align-items: center;
-                gap: 1rem;
+                gap: 0.875rem;
             }
 
             .govt-emblem {
-                width: 60px;
-                height: 60px;
-                background: var(--accent-gold);
-                border-radius: 50%;
+                width: 44px;
+                height: 44px;
+                background: #1e293b;
+                border: 1px solid #334155;
+                border-radius: 8px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 1.5rem;
-                font-weight: bold;
-                color: var(--primary-blue);
+                font-size: 1.25rem;
+                color: #f8fafc;
             }
 
             .header-title {
@@ -771,14 +757,15 @@ async def dashboard():
             }
 
             .header-title h1 {
-                font-size: 1.75rem;
-                font-weight: 700;
-                margin-bottom: 0.25rem;
+                font-size: 1.35rem;
+                font-weight: 600;
+                margin-bottom: 0.125rem;
+                letter-spacing: -0.025em;
             }
 
             .header-subtitle {
-                font-size: 0.95rem;
-                opacity: 0.9;
+                font-size: 0.825rem;
+                color: #94a3b8;
                 font-weight: 400;
             }
 
@@ -786,10 +773,13 @@ async def dashboard():
                 display: flex;
                 align-items: center;
                 gap: 0.5rem;
-                background: rgba(255, 255, 255, 0.1);
-                padding: 0.5rem 1rem;
-                border-radius: 50px;
-                backdrop-filter: blur(10px);
+                background: #1e293b;
+                border: 1px solid #334155;
+                padding: 0.375rem 0.875rem;
+                border-radius: 6px;
+                font-size: 0.8rem;
+                font-weight: 500;
+                color: #e2e8f0;
             }
 
             .main-container {
@@ -803,24 +793,30 @@ async def dashboard():
 
             .panel {
                 background: var(--bg-white);
-                border-radius: 12px;
-                box-shadow: var(--shadow-lg);
+                border-radius: 8px;
+                box-shadow: var(--shadow-sm);
                 border: 1px solid var(--border-light);
                 overflow: hidden;
             }
 
             .panel-header {
-                background: linear-gradient(90deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
-                color: white;
-                padding: 1.25rem 1.5rem;
+                background: #f8fafc;
+                color: var(--text-dark);
+                padding: 1rem 1.25rem;
                 display: flex;
                 align-items: center;
                 gap: 0.75rem;
+                border-bottom: 1px solid var(--border-light);
+            }
+
+            .panel-header i {
+                color: #6366f1;
             }
 
             .panel-header h2 {
-                font-size: 1.25rem;
+                font-size: 1.05rem;
                 font-weight: 600;
+                letter-spacing: -0.01em;
             }
 
             .panel-content {
@@ -858,27 +854,37 @@ async def dashboard():
             }
 
             label {
-                display: block;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
                 font-weight: 500;
                 color: var(--text-dark);
                 margin-bottom: 0.5rem;
+                font-size: 0.85rem;
+            }
+
+            .label-icon {
+                color: #64748b; /* Slate 500 */
                 font-size: 0.9rem;
+                width: 16px;
+                text-align: center;
             }
 
             input, select {
                 width: 100%;
-                padding: 0.75rem;
+                padding: 0.625rem;
                 border: 1px solid var(--border-light);
                 border-radius: 6px;
                 font-size: 0.9rem;
-                transition: all 0.3s ease;
+                transition: all 0.2s ease;
                 background: var(--bg-white);
+                color: var(--text-dark);
             }
 
             input:focus, select:focus {
                 outline: none;
-                border-color: var(--secondary-blue);
-                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                border-color: #6366f1;
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
             }
 
             .submit-btn {
@@ -1141,21 +1147,21 @@ async def dashboard():
         <header class="header">
             <div class="header-content">
                 <div class="logo-section">
-                    <div class="govt-emblem">🛡️</div>
+                    <div class="govt-emblem"><i class="fas fa-shield-halved"></i></div>
                     <div class="header-title">
                         <h1>Government Fraud Detection System</h1>
                         <div class="header-subtitle">Advanced AI-Powered Financial Security Platform</div>
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 1rem;">
-                    <a href="/" style="color: white; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.1); padding: 0.5rem 1rem; border-radius: 8px; font-weight: 500; font-size: 0.9rem; transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.2);">
+                    <a href="/" style="color: white; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.05); padding: 0.5rem 1rem; border-radius: 6px; font-weight: 500; font-size: 0.8rem; transition: all 0.2s ease; border: 1px solid rgba(255,255,255,0.1);">
                         <i class="fas fa-arrow-left"></i> Landing Page
                     </a>
                     <div class="security-badge">
                         <i class="fas fa-shield-alt"></i>
                         <span>Classified</span>
                     </div>
-                    <div id="geminiStatusBadge" class="security-badge" style="background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.4); color: #10b981;">
+                    <div id="geminiStatusBadge" class="security-badge">
                         <i class="fas fa-brain"></i>
                         <span id="geminiStatusText">Gemini: Connecting...</span>
                     </div>
@@ -1178,22 +1184,22 @@ async def dashboard():
                             </div>
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="amount">💰 Amount (₹)</label>
+                                    <label for="amount"><i class="fa-solid fa-wallet label-icon"></i>Amount (₹)</label>
                                     <input type="number" id="amount" name="amount" value="75000" step="0.01" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="hour_of_day">🕐 Hour of Day</label>
+                                    <label for="hour_of_day"><i class="fa-solid fa-clock label-icon"></i>Hour of Day</label>
                                     <input type="number" id="hour_of_day" name="hour_of_day" value="2" min="0" max="23" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="is_weekend">📅 Weekend Transaction</label>
+                                    <label for="is_weekend"><i class="fa-solid fa-calendar label-icon"></i>Weekend Transaction</label>
                                     <select id="is_weekend" name="is_weekend" required>
                                         <option value="0">No</option>
                                         <option value="1" selected>Yes</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="day_of_week">📆 Day of Week</label>
+                                    <label for="day_of_week"><i class="fa-solid fa-calendar-day label-icon"></i>Day of Week</label>
                                     <select id="day_of_week" name="day_of_week" required>
                                         <option value="Monday">Monday</option>
                                         <option value="Tuesday">Tuesday</option>
@@ -1214,7 +1220,7 @@ async def dashboard():
                             </div>
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="sender_age_group">👤 Sender Age Group</label>
+                                    <label for="sender_age_group"><i class="fa-solid fa-user label-icon"></i>Sender Age Group</label>
                                     <select id="sender_age_group" name="sender_age_group" required>
                                         <option value="18-25" selected>18-25</option>
                                         <option value="26-35">26-35</option>
@@ -1223,7 +1229,7 @@ async def dashboard():
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="receiver_age_group">👥 Receiver Age Group</label>
+                                    <label for="receiver_age_group"><i class="fa-solid fa-users label-icon"></i>Receiver Age Group</label>
                                     <select id="receiver_age_group" name="receiver_age_group" required>
                                         <option value="18-25">18-25</option>
                                         <option value="26-35" selected>26-35</option>
@@ -1232,7 +1238,7 @@ async def dashboard():
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="sender_state">📍 Sender State</label>
+                                    <label for="sender_state"><i class="fa-solid fa-location-dot label-icon"></i>Sender State</label>
                                     <select id="sender_state" name="sender_state" required>
                                         <option value="Delhi" selected>Delhi</option>
                                         <option value="Mumbai">Mumbai</option>
@@ -1244,7 +1250,7 @@ async def dashboard():
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="sender_bank">🏦 Sender Bank</label>
+                                    <label for="sender_bank"><i class="fa-solid fa-building-columns label-icon"></i>Sender Bank</label>
                                     <select id="sender_bank" name="sender_bank" required>
                                         <option value="SBI">SBI</option>
                                         <option value="HDFC" selected>HDFC</option>
@@ -1254,7 +1260,7 @@ async def dashboard():
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="receiver_bank">🏛️ Receiver Bank</label>
+                                    <label for="receiver_bank"><i class="fa-solid fa-building label-icon"></i>Receiver Bank</label>
                                     <select id="receiver_bank" name="receiver_bank" required>
                                         <option value="SBI" selected>SBI</option>
                                         <option value="HDFC">HDFC</option>
@@ -1273,7 +1279,7 @@ async def dashboard():
                             </div>
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label for="merchant_category">🏪 Merchant Category</label>
+                                    <label for="merchant_category"><i class="fa-solid fa-store label-icon"></i>Merchant Category</label>
                                     <select id="merchant_category" name="merchant_category" required>
                                         <option value="Grocery">Grocery</option>
                                         <option value="Fuel">Fuel</option>
@@ -1284,7 +1290,7 @@ async def dashboard():
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="device_type">📱 Device Type</label>
+                                    <label for="device_type"><i class="fa-solid fa-mobile-screen label-icon"></i>Device Type</label>
                                     <select id="device_type" name="device_type" required>
                                         <option value="Android" selected>Android</option>
                                         <option value="iOS">iOS</option>
@@ -1293,7 +1299,7 @@ async def dashboard():
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="transaction_type">💳 Transaction Type</label>
+                                    <label for="transaction_type"><i class="fa-solid fa-credit-card label-icon"></i>Transaction Type</label>
                                     <select id="transaction_type" name="transaction_type" required>
                                         <option value="P2P" selected>P2P</option>
                                         <option value="P2M">P2M</option>
@@ -1301,7 +1307,7 @@ async def dashboard():
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="network_type">📡 Network Type</label>
+                                    <label for="network_type"><i class="fa-solid fa-wifi label-icon"></i>Network Type</label>
                                     <select id="network_type" name="network_type" required>
                                         <option value="4G" selected>4G</option>
                                         <option value="WiFi">WiFi</option>
@@ -1310,7 +1316,7 @@ async def dashboard():
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="transaction_status">✅ Transaction Status</label>
+                                    <label for="transaction_status"><i class="fa-solid fa-circle-check label-icon"></i>Transaction Status</label>
                                     <select id="transaction_status" name="transaction_status" required>
                                         <option value="SUCCESS" selected>SUCCESS</option>
                                         <option value="PENDING">PENDING</option>
@@ -1661,14 +1667,14 @@ async def dashboard():
                     const text = document.getElementById('geminiStatusText');
                     
                     if (health.gemini_ai_enabled) {
-                        badge.style.background = 'rgba(16, 185, 129, 0.2)';
-                        badge.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-                        badge.style.color = '#10b981';
+                        badge.style.background = 'rgba(52, 211, 153, 0.15)';
+                        badge.style.borderColor = 'rgba(52, 211, 153, 0.3)';
+                        badge.style.color = '#34d399';
                         text.textContent = 'Gemini: Active';
                     } else {
-                        badge.style.background = 'rgba(245, 158, 11, 0.2)';
-                        badge.style.borderColor = 'rgba(245, 158, 11, 0.4)';
-                        badge.style.color = '#f59e0b';
+                        badge.style.background = 'rgba(245, 158, 11, 0.15)';
+                        badge.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+                        badge.style.color = '#fbbf24';
                         text.textContent = 'Gemini: Fallback Active';
                     }
                 } catch (error) {
