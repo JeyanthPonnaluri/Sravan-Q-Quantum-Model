@@ -1,12 +1,12 @@
+# Ignore environment variables and secrets
+.env
+
+# Ignore local presentation guidelines
+PITCH_SCRIPT.md
+
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-.pytest_cache/
 venv/
 .venv/
-.env
-.gemini/
-.vscode/
-.idea/
-*.log
-*.pkl

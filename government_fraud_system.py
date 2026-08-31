@@ -10,6 +10,16 @@ from pydantic import BaseModel
 import pickle
 import numpy as np
 import os
+
+# Load local .env file manually if exists
+if os.path.exists(".env"):
+    with open(".env", "r") as f:
+        for line in f:
+            if "=" in line and not line.startswith("#"):
+                parts = line.strip().split("=", 1)
+                if len(parts) == 2:
+                    os.environ[parts[0].strip()] = parts[1].strip()
+
 from datetime import datetime
 import json
 from database import Database
