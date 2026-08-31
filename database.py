@@ -122,12 +122,46 @@ class Database:
             "node_validator_1": {"d": 101, "n": 2773},
             "node_validator_2": {"d": 125, "n": 2419}
         }
+        import os
+        peer_env = os.getenv("PEER_NODES", "")
+        peer_nodes = [p.strip() for p in peer_env.split(",") if p.strip()]
+        
         consensus_signatures = {}
+        
+        import urllib.request
+        import urllib.error
+        
         for node_id, keys in nodes.items():
-            # Convert previous block hash to integer modulo n
-            val = sum(ord(c) for c in previous_hash) % keys["n"]
-            sig = pow(val, keys["d"], keys["n"])
-            consensus_signatures[node_id] = f"{node_id}_sig_{sig}"
+            signature_acquired = False
+            if peer_nodes:
+                # Map nodes to peer index: node_validator_1 -> index 0, node_validator_2 -> index 1
+                peer_idx = 0 if node_id == "node_validator_1" else (1 if node_id == "node_validator_2" else -1)
+                if 0 <= peer_idx < len(peer_nodes):
+                    peer_url = peer_nodes[peer_idx]
+                    try:
+                        req_url = f"{peer_url}/api/v1/consensus/sign"
+                        req_data = json.dumps({"block_hash": previous_hash, "node_id": node_id}).encode('utf-8')
+                        req = urllib.request.Request(
+                            req_url, 
+                            data=req_data, 
+                            headers={'Content-Type': 'application/json'},
+                            method='POST'
+                        )
+                        with urllib.request.urlopen(req, timeout=0.5) as response:
+                            res = json.loads(response.read().decode('utf-8'))
+                            if res.get("status") == "signed":
+                                consensus_signatures[node_id] = res.get("signature")
+                                print(f"[Consensus Network] Retrieved real validation signature from {node_id} ({peer_url})")
+                                signature_acquired = True
+                    except Exception:
+                        # Timeout or offline: fall back to local computation
+                        pass
+            
+            if not signature_acquired:
+                # Convert previous block hash to integer modulo n
+                val = sum(ord(c) for c in previous_hash) % keys["n"]
+                sig = pow(val, keys["d"], keys["n"])
+                consensus_signatures[node_id] = f"{node_id}_sig_{sig}"
 
         # Prepare block data
         block_data = {

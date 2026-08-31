@@ -2983,6 +2983,30 @@ async def get_webhook_logs():
     """Retrieve simulated webhook delivery logs"""
     return webhook_deliveries
 
+@app.post("/api/v1/consensus/sign")
+async def consensus_sign(payload: dict):
+    block_hash = payload.get("block_hash", "")
+    node_id = payload.get("node_id", "node_primary")
+    
+    nodes = {
+        "node_primary": {"d": 79, "n": 3233},
+        "node_validator_1": {"d": 101, "n": 2773},
+        "node_validator_2": {"d": 125, "n": 2419}
+    }
+    
+    if node_id not in nodes or not block_hash:
+        raise HTTPException(status_code=400, detail="Invalid node_id or empty block_hash")
+        
+    keys = nodes[node_id]
+    val = sum(ord(c) for c in block_hash) % keys["n"]
+    sig = pow(val, keys["d"], keys["n"])
+    
+    return {
+        "status": "signed",
+        "node_id": node_id,
+        "signature": f"{node_id}_sig_{sig}"
+    }
+
 import urllib.request
 import urllib.error
 

@@ -20,7 +20,18 @@ class QuantumKernel:
         """
         self.n_qubits = min(n_qubits, 5)  # Enforce ≤ 5 qubits constraint
         self.shots = shots
-        self.device = qml.device('default.qubit', wires=self.n_qubits, shots=shots)
+        import os
+        ibmq_key = os.getenv("IBMQ_API_KEY")
+        if ibmq_key:
+            try:
+                # Load IBM Quantum Backend using pennyLane-qiskit plugin
+                self.device = qml.device('qiskit.ibmq', wires=self.n_qubits, shots=shots, ibmqx_token=ibmq_key)
+                print(f"[Quantum Engine] QPU Device status: LIVE IBM HARDWARE backend enabled via API key.")
+            except Exception as e:
+                print(f"[Quantum Engine] Warning: Failed to load IBM QPU ({e}). Falling back to simulator.")
+                self.device = qml.device('default.qubit', wires=self.n_qubits, shots=shots)
+        else:
+            self.device = qml.device('default.qubit', wires=self.n_qubits, shots=shots)
         
         # Build the quantum feature map
         self.feature_map = self.build_feature_state(self.n_qubits)
