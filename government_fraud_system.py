@@ -10,6 +10,7 @@ from pydantic import BaseModel
 import pickle
 import numpy as np
 import os
+import time
 
 # Load local .env file manually if exists
 if os.path.exists(".env"):
@@ -307,8 +308,8 @@ async def background_fraud_auditing(transaction_data: dict, transaction_hash: st
     import sqlite3
     
     try:
-        # Run full prediction
-        pred = quantum_meta_model.predict(transaction_data)
+        # Run full prediction in a worker thread to prevent event loop starvation
+        pred = await asyncio.to_thread(quantum_meta_model.predict, transaction_data)
         
         # Calculate risk and optimal action
         risk_lvl, dynamic_action = cost_optimizer.find_action_for_score(pred.final_fraud_score, current_optimal_threshold)
@@ -2979,7 +2980,8 @@ async def api_verify_transaction(transaction: TransactionFull):
             "logical_score": res['logical_score']
         },
         "flags": res['security_flags'],
-        "recommendations": res['recommendations']
+        "recommendations": res['recommendations'],
+        "threat_contributions": res.get('threat_contributions', [])
     }
     
     # 2. Trigger cold path asynchronously in the background (QML + Gemini + Webhook dispatches)
