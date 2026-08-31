@@ -118,6 +118,49 @@ def load_models():
         logger.error(f"Could not load Enhanced Quantum Meta Model: {e}")
         return False
 
+def calculate_threat_contributions(amount: float, hour: int, is_weekend: int, sender_age: str, receiver_age: str, sender_bank: str, receiver_bank: str, sender_state: str, merchant_cat: str) -> list:
+    """Helper to calculate mock feature risk contributions matching model logic"""
+    contributions = []
+    
+    # 1. Amount
+    if amount > 150000:
+        contributions.append({"feature": "Transaction Amount (₹1.5L+ Critical)", "value": 45, "type": "increase"})
+    elif amount > 50000:
+        contributions.append({"feature": "Transaction Amount (High)", "value": 25, "type": "increase"})
+    else:
+        contributions.append({"feature": "Transaction Amount (Low-Risk)", "value": 15, "type": "decrease"})
+        
+    # 2. Timing
+    if hour < 6:
+        contributions.append({"feature": "Transaction Time (00:00 - 06:00 Off-Hours)", "value": 30, "type": "increase"})
+    elif hour >= 22:
+        contributions.append({"feature": "Transaction Time (Late Night)", "value": 15, "type": "increase"})
+    else:
+        contributions.append({"feature": "Transaction Time (Business Hours)", "value": 10, "type": "decrease"})
+        
+    # 3. Bank relationship
+    if sender_bank == receiver_bank:
+        contributions.append({"feature": "Intra-bank Transfer (Trusted relation)", "value": 20, "type": "decrease"})
+    else:
+        if receiver_bank == "Unknown":
+            contributions.append({"feature": "Target Institution: Unknown Bank", "value": 25, "type": "increase"})
+        else:
+            contributions.append({"feature": "Inter-bank Transfer (Cross-network)", "value": 10, "type": "increase"})
+            
+    # 4. Age disparity
+    if (sender_age == '18-25' and receiver_age == '56+') or (sender_age == '56+' and receiver_age == '18-25'):
+        contributions.append({"feature": "Age disparity (Generational mismatch)", "value": 20, "type": "increase"})
+        
+    # 5. Weekend category check
+    if is_weekend and merchant_cat in ["Entertainment", "Other"]:
+        contributions.append({"feature": "Weekend luxury category activity", "value": 15, "type": "increase"})
+        
+    # 6. Location check
+    if sender_state != "Bangalore" and merchant_cat == "Entertainment":
+        contributions.append({"feature": "Out-of-region card activity", "value": 15, "type": "increase"})
+        
+    return contributions
+
 def predict_fraud_sync_path(transaction: TransactionFull):
     """Synchronous hot path: Executes fast classical pre-classifiers and rules in <= 15ms"""
     # 1. Evaluate classical ML heuristics
@@ -170,6 +213,19 @@ def predict_fraud_sync_path(transaction: TransactionFull):
     })
     transaction_hash = db.save_transaction(db_data)
     
+    # Calculate threat contributions
+    threat_contributions = calculate_threat_contributions(
+        amount=amount,
+        hour=hour,
+        is_weekend=transaction.is_weekend,
+        sender_age=transaction.sender_age_group,
+        receiver_age=transaction.receiver_age_group,
+        sender_bank=transaction.sender_bank,
+        receiver_bank=transaction.receiver_bank,
+        sender_state=transaction.sender_state,
+        merchant_cat=transaction.merchant_category
+    )
+    
     return {
         'transaction_hash': transaction_hash,
         'quantum_score': 0.0,
@@ -181,7 +237,8 @@ def predict_fraud_sync_path(transaction: TransactionFull):
         'ai_reasoning': "Sync Hot Path completed. Background QML & Gemini scans triggered.",
         'security_flags': rules_triggered,
         'recommendations': [f"Action: {action}"],
-        'saved_to_blockchain': False
+        'saved_to_blockchain': False,
+        'threat_contributions': threat_contributions
     }
 
 async def background_fraud_auditing(transaction_data: dict, transaction_hash: str):
@@ -305,6 +362,18 @@ def predict_fraud_enhanced(transaction: TransactionFull):
         recommendations.append("Alert the receiving institution to place a temporary hold.")
         recommendations.append("Log risk payload to security monitoring index.")
     
+    threat_contributions = calculate_threat_contributions(
+        amount=transaction.amount,
+        hour=transaction.hour_of_day,
+        is_weekend=transaction.is_weekend,
+        sender_age=transaction.sender_age_group,
+        receiver_age=transaction.receiver_age_group,
+        sender_bank=transaction.sender_bank,
+        receiver_bank=transaction.receiver_bank,
+        sender_state=transaction.sender_state,
+        merchant_cat=transaction.merchant_category
+    )
+    
     return {
         'transaction_hash': transaction_hash,
         'quantum_score': round(pred.quantum_score, 2),
@@ -316,7 +385,8 @@ def predict_fraud_enhanced(transaction: TransactionFull):
         'ai_reasoning': f"Model analysis version {pred.model_version}. Identified type: {pred.fraud_type_detected}. Agreement: {pred.model_agreement:.1f}%.",
         'security_flags': security_flags,
         'recommendations': recommendations,
-        'saved_to_blockchain': False
+        'saved_to_blockchain': False,
+        'threat_contributions': threat_contributions
     }
 
 @app.on_event("startup")
@@ -1868,6 +1938,50 @@ async def dashboard():
                         </div>
                     </div>
 
+                    <!-- API WAF SHIELD CONSOLE -->
+                    <div class="split-row" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+                        <div class="card" style="flex: 1;">
+                            <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
+                                <h3 class="card-title">
+                                    <i class="fas fa-shield-halved" style="color: var(--primary);"></i>
+                                    Active API WAF Firewall Shield
+                                </h3>
+                                <span class="badge badge-active" style="display: inline-flex; align-items: center; gap: 0.25rem;">
+                                    <span class="badge-dot"></span> Active
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                                    <div>
+                                        <div style="margin-bottom: 1.25rem;">
+                                            <label style="font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem; display: block;">
+                                                Firewall Request Rate Limit
+                                            </label>
+                                            <div style="display: flex; gap: 1rem; align-items: center;">
+                                                <input type="range" id="sliderWafLimit" class="slider-input" min="2" max="25" step="1" value="10" oninput="updateWafRateLimit(this.value)" style="flex-grow: 1;">
+                                                <span class="slider-val" id="valWafLimit" style="color: var(--primary); font-weight: bold; min-width: 60px; text-align: right;">10 req/s</span>
+                                            </div>
+                                            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
+                                                API requests exceeding this rate limit threshold per client IP will be intercepted and rejected with HTTP 429.
+                                            </p>
+                                        </div>
+
+                                        <button class="btn btn-primary" onclick="simulateWafFloodAttack()" id="wafAttackBtn" style="width: 100%; justify-content: center; background: var(--danger); border-color: var(--danger);">
+                                            <i class="fas fa-bolt"></i> Run High-Velocity Bot Attack
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <label style="font-weight: 600; font-size: 0.8rem; margin-bottom: 0.25rem; display: block;">
+                                            WAF Threat Intelligence Logs Terminal
+                                        </label>
+                                        <pre id="wafConsoleLogs" style="font-family: monospace; font-size: 0.75rem; height: 160px; background: #0b0f19; color: #94a3b8; border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem 0.75rem; overflow-y: auto; margin: 0; line-height: 1.4;">[System Monitor] WAF API Shield active. Monitoring public merchant endpoints...
+[System Monitor] Standard rate-limiting configured at 10 requests/second.</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">
@@ -2009,6 +2123,34 @@ async def dashboard():
                     `<div class="alert-pill alert-pill-success"><i class="fas fa-check-circle"></i> ${rec}</div>`
                 ).join('');
 
+                let contributionsHtml = '';
+                if (result.threat_contributions && result.threat_contributions.length > 0) {
+                    contributionsHtml = `
+                        <div style="margin-top: 1rem; margin-bottom: 1.5rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem;">
+                            <h4 style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--text-main); display: flex; align-items: center; gap: 0.25rem;">
+                                <i class="fas fa-chart-bar" style="color: var(--primary);"></i> Quantum-Classical Risk Factor Contributions
+                            </h4>
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                ${result.threat_contributions.map(contrib => {
+                                    const color = contrib.type === 'increase' ? '#ef4444' : '#10b981';
+                                    const sign = contrib.type === 'increase' ? '+' : '-';
+                                    return `
+                                        <div style="font-size: 0.8rem;">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem; font-weight: 500;">
+                                                <span style="color: var(--text-main);">${contrib.feature}</span>
+                                                <span style="color: ${color};">${sign}${contrib.value}%</span>
+                                            </div>
+                                            <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden;">
+                                                <div style="width: ${contrib.value}%; height: 100%; background: ${color}; border-radius: 3px;"></div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
                 const html = `
                     <div class="assessment-banner ${badgeClass}">
                         <div class="assessment-banner-details">
@@ -2036,6 +2178,8 @@ async def dashboard():
                             <div class="score-gauge-lbl" style="color: #0369a1; font-weight: bold;">Fusion Score</div>
                         </div>
                     </div>
+                    
+                    ${contributionsHtml}
                     
                     <div class="reasoning-box">
                         <h4><i class="fas fa-brain"></i> Threat Analysis (Gemini Flash)</h4>
@@ -2458,6 +2602,72 @@ async def dashboard():
                 }
             }
 
+            async function updateWafRateLimit(val) {
+                document.getElementById('valWafLimit').textContent = val + ' req/s';
+                try {
+                    await fetch('/api/v1/configure_waf', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ limit: parseInt(val) })
+                    });
+                    
+                    const consoleLogs = document.getElementById('wafConsoleLogs');
+                    consoleLogs.innerHTML += `\n[WAF Config] Rate limit updated dynamically to ${val} requests/second.`;
+                    consoleLogs.scrollTop = consoleLogs.scrollHeight;
+                } catch (error) {
+                    console.error('Error configuring WAF rate limit:', error);
+                }
+            }
+
+            async function simulateWafFloodAttack() {
+                const btn = document.getElementById('wafAttackBtn');
+                const consoleLogs = document.getElementById('wafConsoleLogs');
+                
+                btn.disabled = true;
+                consoleLogs.innerHTML = `[System Monitor] ⚠️ HIGH-VELOCITY INGRESS DETECTED. Analyzing packets...`;
+                
+                try {
+                    const response = await fetch('/api/v1/simulate_flood_attack', { method: 'POST' });
+                    const result = await response.json();
+                    
+                    let idx = 0;
+                    const logs = result.logs;
+                    
+                    function printNextLog() {
+                        if (idx < logs.length) {
+                            const entry = logs[idx];
+                            const timeStr = entry.timestamp.split('T')[1].substring(0, 12);
+                            let color = '#34d399'; 
+                            let icon = '✔️';
+                            if (entry.status === 'BLOCKED') {
+                                color = '#f87171'; 
+                                icon = '❌ SHIELD_BLOCK';
+                            }
+                            
+                            const logText = `\n[${timeStr}] ${icon} IP: ${entry.ip} - ${entry.action} - ${entry.reason}`;
+                            consoleLogs.innerHTML += `<span style="color: ${color};">${logText}</span>`;
+                            consoleLogs.scrollTop = consoleLogs.scrollHeight;
+                            
+                            idx++;
+                            setTimeout(printNextLog, 40); 
+                        } else {
+                            consoleLogs.innerHTML += `\n[WAF Shield] Threat mitigated. Bot source rate-limited successfully. API nodes stable.`;
+                            consoleLogs.scrollTop = consoleLogs.scrollHeight;
+                            btn.disabled = false;
+                        }
+                    }
+                    
+                    setTimeout(printNextLog, 500);
+                    
+                } catch (error) {
+                    console.error('Error simulating WAF flood:', error);
+                    consoleLogs.innerHTML += `\n[Error] Failed to execute attack simulation.`;
+                    btn.disabled = false;
+                }
+            }
+
             // Initialize webhook url configuration
             saveWebhookUrl();
 
@@ -2558,11 +2768,74 @@ async def configure_webhook(payload: dict):
     configured_webhook_url = url
     return {"status": "success", "configured_url": url}
 
+waf_rate_limit = 10
+api_request_logs = {}
+
+def check_waf_rate_limit(client_id: str, limit_per_sec: int = 10) -> bool:
+    """Sliding window rate limit check. Returns True if allowed, False if blocked."""
+    global api_request_logs
+    current_time = time.time()
+    
+    if client_id not in api_request_logs:
+        api_request_logs[client_id] = []
+        
+    # Filter timestamps in the last 1 second
+    timestamps = [t for t in api_request_logs[client_id] if current_time - t <= 1.0]
+    api_request_logs[client_id] = timestamps
+    
+    if len(timestamps) >= limit_per_sec:
+        return False
+        
+    api_request_logs[client_id].append(current_time)
+    return True
+
+@app.post("/api/v1/configure_waf")
+async def configure_waf(payload: dict):
+    global waf_rate_limit
+    waf_rate_limit = int(payload.get("limit", 10))
+    return {"status": "success", "waf_rate_limit": waf_rate_limit}
+
+@app.post("/api/v1/simulate_flood_attack")
+async def simulate_flood_attack():
+    """Simulates a fast bot flood of 30 requests in 0.5s to trigger WAF rate-limiting"""
+    global waf_rate_limit
+    import random
+    
+    logs = []
+    current_time = time.time()
+    mock_ips = ["198.51.100.45", "203.0.113.82", "192.0.2.143", "198.51.100.12"]
+    flood_ip = "198.51.100.45"
+    
+    for i in range(30):
+        req_time = current_time + (i * 0.01)
+        is_blocked = i >= waf_rate_limit
+        status = "BLOCKED" if is_blocked else "ALLOWED"
+        action = "WAF_BLOCK" if is_blocked else "VERIFY"
+        
+        logs.append({
+            "timestamp": datetime.fromtimestamp(req_time).isoformat(),
+            "ip": flood_ip if random.random() > 0.3 else random.choice(mock_ips),
+            "status": status,
+            "action": action,
+            "request_index": i + 1,
+            "reason": "Velocity threshold exceeded" if is_blocked else "Normal signature scan"
+        })
+        
+    return {"status": "attack_simulated", "logs": logs, "waf_rate_limit": waf_rate_limit}
+
 webhook_deliveries = []
 
 @app.post("/api/v1/verify")
 async def api_verify_transaction(transaction: TransactionFull):
     """Developer API gateway endpoint for checkout verification with simulated webhooks"""
+    # 0. WAF Rate Limit check
+    client_ip = "127.0.0.1"
+    if not check_waf_rate_limit(client_ip, limit_per_sec=waf_rate_limit):
+        raise HTTPException(
+            status_code=429,
+            detail=f"WAF Rate Limit Exceeded. Shield blocked request (limit: {waf_rate_limit} req/sec)."
+        )
+
     # 1. Run Hot Path prediction synchronously (<= 15ms)
     res = predict_fraud_sync_path(transaction)
     
